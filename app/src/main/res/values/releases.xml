@@ -30,4 +30,9 @@
         Added profile links to the sidebar\n
         Added search to toolbar
     </string>
+    <string name="release_16">
+        Scroll to top on page change\n
+        Better UX for urls and spoilers\n
+        Open links in app even if it\'s not running
+    </string>
 </resources>
