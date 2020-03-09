@@ -358,7 +358,7 @@ class MainActivity : ThemedActivity() {
                         val last = contentStack.lastOrNull()
                         if (last is TopicContentFragment && last.contents.topic.value?.id == topicId) {
                             // this is our fragment, open link in it
-                            last.requireArguments().putSerializable(TopicContentFragment.URL_ARG, url.toString())
+                            last.requireArguments().putString(TopicContentFragment.URL_ARG, url.toString())
                             last.refreshContent()
                             return
                         }

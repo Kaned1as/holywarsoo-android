@@ -100,7 +100,7 @@ class TopicViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
             val fragment = TopicContentFragment().apply {
                 arguments = Bundle().apply {
-                    putSerializable(TopicContentFragment.URL_ARG, relevantUrl)
+                    putString(TopicContentFragment.URL_ARG, relevantUrl)
                 }
             }
 
