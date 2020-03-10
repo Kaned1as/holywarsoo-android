@@ -1,7 +1,6 @@
 package com.kanedias.holywarsoo
 
 import android.os.Bundle
-import android.text.InputType
 import android.text.format.DateUtils
 import android.view.*
 import android.widget.EditText
@@ -14,10 +13,7 @@ import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.LayoutInflaterCompat
 import androidx.core.view.iterator
-import androidx.core.view.marginStart
-import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -133,6 +129,26 @@ open class MessageViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
             anchor.context.shareLink(message.link)
             true
         }
+
+        // edit message
+        val editMenuItem = pmenu.menu.findItem(R.id.menu_message_edit)
+        if (message.isEditable) {
+            pmenu.menu.findItem(R.id.menu_message_edit).setOnMenuItemClickListener {
+                val messageEdit = EditMessageFragment().apply {
+                    arguments = Bundle().apply {
+                        putInt(EditMessageFragment.EDIT_MESSAGE_ID_ARG, message.id)
+                    }
+                }
+
+                val activity = itemView.context as AppCompatActivity
+                messageEdit.show(activity.supportFragmentManager, "showing edit message fragment")
+
+                true
+            }
+        } else {
+            editMenuItem.isVisible = false
+        }
+
 
         // report message to the administration
         pmenu.menu.findItem(R.id.menu_message_report).setOnMenuItemClickListener {
