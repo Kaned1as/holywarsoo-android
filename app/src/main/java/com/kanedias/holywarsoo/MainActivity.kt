@@ -204,7 +204,8 @@ class MainActivity : ThemedActivity() {
             13 to Release("1.3.1", R.string.release_13),
             14 to Release("1.3.2", R.string.release_14),
             15 to Release("1.3.3", R.string.release_15),
-            16 to Release("1.3.4", R.string.release_16)
+            16 to Release("1.3.4", R.string.release_16),
+            17 to Release("1.4.0", R.string.release_17)
         )
 
         if (Config.lastVersion == 0) {

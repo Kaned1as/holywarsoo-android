@@ -35,4 +35,8 @@
         Better UX for urls and spoilers\n
         Open links in app even if it\'s not running
     </string>
+    <string name="release_17">
+        Editing messages implemented\n
+        Proper strikethrough support
+    </string>
 </resources>
