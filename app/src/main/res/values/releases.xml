@@ -39,4 +39,5 @@
         Editing messages implemented\n
         Proper strikethrough support
     </string>
+    <string name="release_18">Message deletion implementing</string>
 </resources>
