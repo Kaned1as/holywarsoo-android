@@ -40,4 +40,5 @@
         Поддержка зачёркнутого текста
     </string>
     <string name="release_18">Удаление сообщений</string>
+    <string name="release_20">Добавлена поддержка добавления смайликов к сообщениям</string>
 </resources>
