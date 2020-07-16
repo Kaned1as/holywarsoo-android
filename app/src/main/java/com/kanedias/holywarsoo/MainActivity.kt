@@ -356,7 +356,7 @@ class MainActivity : ThemedActivity() {
 
                         // try to find fragment with this topic, if it's last one, launch it
                         val contentStack = supportFragmentManager.fragments.filterIsInstance<ContentFragment>()
-                        val last = contentStack.lastOrNull()
+                        val last = contentStack.lastOrNull { it.isVisible }
                         if (last is TopicContentFragment && last.contents.topic.value?.id == topicId) {
                             // this is our fragment, open link in it
                             last.requireArguments().putString(TopicContentFragment.URL_ARG, url.toString())
@@ -369,7 +369,7 @@ class MainActivity : ThemedActivity() {
                     if (messageId != null) {
                         // try to find fragment with this forum, if it's last one, launch it
                         val contentStack = supportFragmentManager.fragments.filterIsInstance<ContentFragment>()
-                        val last = contentStack.lastOrNull()
+                        val last = contentStack.lastOrNull { it.isVisible }
                         if (last is TopicContentFragment && last.contents.topic.value?.messages?.any { it.id == messageId } == true) {
                             // highlight the message
                             last.highlightMessage(messageId)
