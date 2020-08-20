@@ -80,6 +80,11 @@ android {
             setEnable(true)
             reset()
             include("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
+
+            // don't produce universal apk if publishing to google play
+            // as all architectures are covered by existing splits
+            val gplayPublishing = project.hasProperty("gplayReleaseType")
+            setUniversalApk(!gplayPublishing)
         }
     }
 
@@ -87,14 +92,6 @@ android {
     productFlavors {
         create("fdroid") {
             setDimension("purity")
-
-            // fdroid split should contain universal apk
-            // fdroid currently doesn't support auto-updating for multiple ABI APKs
-            splits {
-                abi {
-                    setUniversalApk(true)
-                }
-            }
         }
 
         create("googleplay") {
@@ -145,10 +142,7 @@ kapt {
 
 play {
     serviceAccountCredentials = file("misc/android-publisher-account.json")
-    track = when (project.hasProperty("releaseType")) {
-        true -> project.property("releaseType").toString()
-        false -> "alpha"
-    }
+    track = project.findProperty("gplayReleaseType").toString()
 }
 
 dependencies {
