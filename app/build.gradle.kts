@@ -36,8 +36,8 @@ android {
         manifestPlaceholders = mapOf("mainHost" to "holywarsoo.net")
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 21
-        versionName = "1.5.1"
+        versionCode = 22
+        versionName = "1.5.2"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -80,7 +80,6 @@ android {
             setEnable(true)
             reset()
             include("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
-            setUniversalApk(false)
         }
     }
 
@@ -88,6 +87,14 @@ android {
     productFlavors {
         create("fdroid") {
             setDimension("purity")
+
+            // fdroid split should contain universal apk
+            // fdroid currently doesn't support auto-updating for multiple ABI APKs
+            splits {
+                abi {
+                    setUniversalApk(true)
+                }
+            }
         }
 
         create("googleplay") {
