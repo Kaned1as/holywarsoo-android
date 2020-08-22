@@ -62,6 +62,7 @@ cache:
     - .gradle/wrapper/
     # rust compiled deps
     - html2md/target
+    - html2md/.cargo/registry
 
 
 stages:
