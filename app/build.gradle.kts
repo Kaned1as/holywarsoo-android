@@ -22,6 +22,7 @@ repositories {
     jcenter()
     maven { url = URI.create("https://jitpack.io") }
     maven { url = URI.create("https://oss.sonatype.org/content/repositories/snapshots/") }
+    maven { url = URI.create("https://raw.github.com/Psiphon-Labs/psiphon-tunnel-core-Android-library/master") }
 }
 
 fun versionDetails() = (extra["versionDetails"] as groovy.lang.Closure<*>)() as VersionDetails
@@ -36,8 +37,8 @@ android {
         manifestPlaceholders = mapOf("mainHost" to "holywarsoo.net")
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 24
-        versionName = "1.5.4"
+        versionCode = 25
+        versionName = "1.5.5"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -160,7 +161,7 @@ dependencies {
     implementation("androidx.room:room-runtime:${extra["roomVersion"]}")         // SQLite ORM lib
 
     implementation("com.jakewharton:butterknife:10.2.0")                         // Annotation processor
-    implementation("com.squareup.okhttp3:okhttp:3.14.0")                         // android http client
+    implementation("com.squareup.okhttp3:okhttp:3.14.2")                         // android http client
     implementation("com.github.franmontiel:PersistentCookieJar:v1.0.1")          // cookie support
     implementation("com.github.stfalcon:stfalcon-imageviewer:0.1.0")             // embedded image viewer
     implementation("com.r0adkll:slidableactivity:2.1.0")                         // fragment swipe right to go back action
@@ -174,6 +175,7 @@ dependencies {
     implementation("io.noties.markwon:html:${extra["markwonVersion"]}")
     implementation("io.noties.markwon:ext-tables:${extra["markwonVersion"]}")
     implementation("io.noties.markwon:ext-strikethrough:${extra["markwonVersion"]}")
+    implementation("ca.psiphon:psiphontunnel:2.0.12")                            // censorship circumvention
 
     implementation("org.jsoup:jsoup:1.12.1")                                     // HTML parser
 

@@ -14,16 +14,15 @@ import com.kanedias.holywarsoo.dto.*
 import com.kanedias.holywarsoo.markdown.toMarkdown
 import com.kanedias.holywarsoo.misc.sanitizeInt
 import com.kanedias.holywarsoo.misc.trySanitizeInt
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import okhttp3.*
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.IOException
+import java.net.InetSocketAddress
+import java.net.Proxy
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -106,11 +105,17 @@ object Network {
         cookiesInfo = appCtx.getSharedPreferences(COOKIES_SHARED_PREFS, Context.MODE_PRIVATE)
         cookiePersistor = SharedPrefsCookiePersistor(cookiesInfo)
         cookieJar = PersistentCookieJar(SetCookieCache(), cookiePersistor)
+
+        setupClient()
+    }
+
+    fun setupClient(proxyPort: Int? = null) {
         httpClient = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .connectionPool(ConnectionPool())
+            .proxy(if (proxyPort == null) { Proxy.NO_PROXY } else { Proxy(Proxy.Type.HTTP, InetSocketAddress(proxyPort)) })
             .dispatcher(Dispatcher())
             .addInterceptor(userAgent)
             .cookieJar(cookieJar)
@@ -1029,7 +1034,16 @@ object Network {
     suspend fun <T> perform(
         networkAction: () -> T,
         uiAction: (input: T) -> Unit = {},
-        exceptionAction: (ex: Exception) -> Unit = { ex -> reportErrors(appCtx, ex) }) {
+        exceptionAction: (ex: Exception) -> Unit = { ex -> reportErrors(appCtx, ex) })
+    {
+        // in case we are using censorship circumvention
+        if (httpClient.proxy()?.type() == Proxy.Type.HTTP) {
+            // wait till psiphon tunnel is connected
+            while (!CensorshipCircumvention.isConnected) {
+                delay(300)
+            }
+        }
+
         try {
             val result = withContext(Dispatchers.IO) { networkAction() }
             uiAction(result)
