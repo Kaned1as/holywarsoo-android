@@ -2,13 +2,15 @@ package com.kanedias.holywarsoo
 
 import android.app.Application
 import android.content.Context
-import ca.psiphon.PsiphonTunnel
-import com.kanedias.holywarsoo.service.*
+import com.kanedias.holywarsoo.service.Config
+import com.kanedias.holywarsoo.service.Database
 import org.acra.ACRA
 import org.acra.annotation.AcraCore
 import org.acra.annotation.AcraDialog
 import org.acra.annotation.AcraMailSender
 import org.acra.data.StringFormat
+import com.kanedias.holywarsoo.service.Network
+import com.kanedias.holywarsoo.service.SmiliesCache
 
 
 /**
@@ -36,7 +38,6 @@ class MainApplication : Application() {
 
         Config.init(this)
         Network.init(this)
-        CensorshipCircumvention.init(this)
         Database.init(this)
         SmiliesCache.init(this)
     }
