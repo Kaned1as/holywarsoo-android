@@ -23,7 +23,6 @@ import org.jsoup.nodes.Element
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Proxy
-import java.net.Proxy.Type
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -116,7 +115,7 @@ object Network {
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .connectionPool(ConnectionPool())
-            .proxy(if (proxyPort == null) { Proxy.NO_PROXY } else { Proxy(Type.SOCKS, InetSocketAddress(proxyPort)) })
+            .proxy(if (proxyPort == null) { Proxy.NO_PROXY } else { Proxy(Proxy.Type.HTTP, InetSocketAddress(proxyPort)) })
             .dispatcher(Dispatcher())
             .addInterceptor(userAgent)
             .cookieJar(cookieJar)
@@ -1037,9 +1036,12 @@ object Network {
         uiAction: (input: T) -> Unit = {},
         exceptionAction: (ex: Exception) -> Unit = { ex -> reportErrors(appCtx, ex) })
     {
-        // wait till psiphon tunnel is connected
-        while (!CensorshipCircumvention.isConnected) {
-            delay(300)
+        // in case we are using censorship circumvention
+        if (httpClient.proxy()?.type() == Proxy.Type.HTTP) {
+            // wait till psiphon tunnel is connected
+            while (!CensorshipCircumvention.isConnected) {
+                delay(300)
+            }
         }
 
         try {

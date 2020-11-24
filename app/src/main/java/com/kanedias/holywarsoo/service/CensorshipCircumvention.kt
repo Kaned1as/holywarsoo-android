@@ -1,7 +1,9 @@
 package com.kanedias.holywarsoo.service
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import ca.psiphon.PsiphonTunnel
 
 /**
@@ -15,7 +17,7 @@ object CensorshipCircumvention: PsiphonTunnel.HostService {
     private lateinit var psiphonTunnel: PsiphonTunnel
 
     var isConnected = false
-    var socksProxyPort = -1
+    var httpProxyPort = -1
 
     fun init(ctx: Context) {
         appCtx = ctx
@@ -36,8 +38,8 @@ object CensorshipCircumvention: PsiphonTunnel.HostService {
         }
         """
 
-    override fun onListeningSocksProxyPort(port: Int) {
-        socksProxyPort = port
+    override fun onListeningHttpProxyPort(port: Int) {
+        httpProxyPort = port
     }
 
     override fun onDiagnosticMessage(message: String?) {
@@ -51,6 +53,6 @@ object CensorshipCircumvention: PsiphonTunnel.HostService {
 
     override fun onConnected() {
         isConnected = true
-        Network.setupClient(proxyPort = socksProxyPort)
+        Network.setupClient(proxyPort = httpProxyPort)
     }
 }
