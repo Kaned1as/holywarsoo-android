@@ -16,6 +16,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
  */
 class DonateHelper(private val activity: AppCompatActivity) {
 
+    fun available() = true
+
     fun donate() {
         val options = arrayOf("Paypal", "Patreon", "Liberapay")
         MaterialAlertDialogBuilder(activity)

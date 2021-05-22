@@ -19,7 +19,6 @@ plugins {
 repositories {
     mavenCentral()
     google()
-    jcenter()
     maven { url = URI.create("https://jitpack.io") }
     maven { url = URI.create("https://oss.sonatype.org/content/repositories/snapshots/") }
 }
@@ -53,7 +52,6 @@ android {
     }
 
     signingConfigs {
-
         create("release") {
             storeFile = file("misc/signing.keystore")
             storePassword = System.getenv("SIGNING_KEYSTORE_PASSWORD")
@@ -185,8 +183,6 @@ dependencies {
     // annotation processors
     kapt("com.jakewharton:butterknife-compiler:10.2.0")                          // view bindings
     kapt("androidx.room:room-compiler:${extra["roomVersion"]}")                  // database schema
-
-    "googleplayImplementation"("com.android.billingclient:billing:2.1.0")        // billing library from Google
 
     testImplementation("junit:junit:4.12")
     androidTestImplementation("androidx.test.ext:junit:1.1.1")

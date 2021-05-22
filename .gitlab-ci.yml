@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://json.schemastore.org/gitlab-ci
 image: openjdk:8-jdk
 
 variables:

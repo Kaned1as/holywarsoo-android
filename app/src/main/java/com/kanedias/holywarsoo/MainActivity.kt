@@ -151,6 +151,9 @@ class MainActivity : ThemedActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         setupTopSearch(menu)
+        if (!donateHelper.available()) {
+            menu.removeItem(R.id.menu_donate)
+        }
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -244,7 +247,11 @@ class MainActivity : ThemedActivity() {
                     .setTitle(R.string.whats_new)
                     .setMessage(mdRendererFrom(this).toMarkdown(whatsNew.toString()))
                     .setPositiveButton(android.R.string.ok, null)
-                    .setNeutralButton(R.string.help_the_project) { _, _ -> donateHelper.donate() }
+                    .apply {
+                        if (donateHelper.available()) {
+                            setNeutralButton(R.string.help_the_project) { _, _ -> donateHelper.donate() }
+                        }
+                    }
                     .show()
             }
         }

@@ -79,15 +79,15 @@ class AboutFragment: EasyAboutFragment() {
                 .setIcon(R.drawable.heart)
                 .setOnClickListener { donateHelper.donate() }
 
-        val emailDescItem = AboutItemBuilder.generateEmailItem(ctx, "kanedias@keemail.me")
+        val emailDescItem = AboutItemBuilder.generateEmailItem(ctx, "kanedias@gmx.net")
                 .setTitle(R.string.send_email)
                 .setIcon(R.drawable.email)
 
         val aboutAuthorCard = AboutCard.Builder(context)
                 .setTitle(R.string.author)
                 .addItem(authorDescItem)
-                .addItem(supportDescItem)
                 .addItem(emailDescItem)
+                .apply { if (donateHelper.available()) addItem(supportDescItem) }
                 .build()
 
         addCard(aboutAppCard)
