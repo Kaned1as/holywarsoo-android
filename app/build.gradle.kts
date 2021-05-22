@@ -35,8 +35,8 @@ android {
         manifestPlaceholders = mapOf("mainHost" to "holywarsoo.net")
         minSdkVersion(21)
         targetSdkVersion(29)
-        versionCode = 28
-        versionName = "1.5.8"
+        versionCode = 29
+        versionName = "1.5.9"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
