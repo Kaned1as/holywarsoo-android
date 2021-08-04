@@ -98,6 +98,9 @@ android {
     }
 
     applicationVariants.all {
+        val imgurApiKey = System.getenv("IMGUR_API_KEY").orEmpty()
+        buildConfigField("String", "IMGUR_API_KEY", "\"$imgurApiKey\"")
+
         outputs.forEach { output ->
             val outputApk = output as ApkVariantOutputImpl
 

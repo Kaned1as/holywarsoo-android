@@ -1,5 +1,6 @@
 package com.kanedias.holywarsoo.service
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.text.Spanned
@@ -45,6 +46,7 @@ import java.util.concurrent.TimeUnit
  *
  * Created on 2019-12-17
  */
+@SuppressLint("StaticFieldLeak") // we pass an application context, its lifespan is same as object anyway
 object Network {
     private const val COOKIES_SHARED_PREFS = "cookies"
     private const val ACCOUNT_SHARED_PREFS = "account"
@@ -52,7 +54,7 @@ object Network {
     private const val PREF_PASSWORD = "password"
 
     private const val USER_AGENT = "Holywarsoo Android ${BuildConfig.VERSION_NAME}"
-    private const val IMGUR_CLIENT_AUTH = "Client-ID 860dc14aa7caf25"
+    private const val IMGUR_CLIENT_AUTH = "Client-ID ${BuildConfig.IMGUR_API_KEY}"
     private val MAIN_IMGUR_URL = HttpUrl.parse("https://api.imgur.com")!!
 
     private lateinit var MAIN_WEBSITE_URL: HttpUrl
