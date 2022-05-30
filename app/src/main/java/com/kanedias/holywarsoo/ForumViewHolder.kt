@@ -10,7 +10,6 @@ import butterknife.BindView
 import butterknife.ButterKnife
 import com.google.android.material.card.MaterialCardView
 import com.kanedias.holywarsoo.dto.ForumDesc
-import com.kanedias.holywarsoo.dto.ForumTopicDesc
 import com.kanedias.holywarsoo.misc.showFullscreenFragment
 import com.kanedias.holywarsoo.misc.visibilityBool
 

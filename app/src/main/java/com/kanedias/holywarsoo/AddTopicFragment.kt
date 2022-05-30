@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
-import androidx.cardview.widget.CardView
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
@@ -99,7 +98,7 @@ class AddTopicFragment: EditorFragment() {
         val forumId = requireArguments().getInt(FORUM_ID_ARG)
         val contextKey = "${DB_CONTEXT_PREFIX}-${forumId}"
 
-        val waitDialog = MaterialAlertDialogBuilder(context)
+        val waitDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.please_wait)
             .setMessage(R.string.submitting)
             .create()

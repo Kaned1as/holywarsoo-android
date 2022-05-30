@@ -5,8 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
@@ -36,9 +35,9 @@ class SearchTopicsContentFragment: FullscreenContentFragment() {
         val view = inflater.inflate(R.layout.fragment_contents, parent, false)
         ButterKnife.bind(this, view)
 
-        contents = ViewModelProviders.of(this).get(SearchTopicsContentsModel::class.java)
-        contents.search.observe(this, Observer { contentView.adapter = SearchPageContentsAdapter(it) })
-        contents.search.observe(this, Observer { refreshViews() })
+        contents = ViewModelProvider(this).get(SearchTopicsContentsModel::class.java)
+        contents.search.observe(viewLifecycleOwner) { contentView.adapter = SearchPageContentsAdapter(it) }
+        contents.search.observe(viewLifecycleOwner) { refreshViews() }
 
         setupUI(contents)
         refreshContent()

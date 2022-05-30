@@ -59,7 +59,7 @@ class PageViews(parent: ContentFragment, model: PageableModel, iv: View) {
             jumpToPageView.hint = "1 .. ${model.pageCount.value}"
             jumpToPageView.setText(model.currentPage.value!!.toString())
 
-            MaterialAlertDialogBuilder(parent.context)
+            MaterialAlertDialogBuilder(parent.requireContext())
                 .setTitle(R.string.jump_to_page)
                 .setView(jumpToPageView)
                 .setNegativeButton(android.R.string.cancel, null)

@@ -1,5 +1,5 @@
 buildscript {
-    val kotlinVersion: String by extra("1.3.61")
+    val kotlinVersion: String by extra("1.6.21")
 
     repositories {
         google()
@@ -14,9 +14,9 @@ buildscript {
 allprojects {
 
     dependencies {
-        val kotlinVersion: String by extra("1.3.61")
-        val acraVersion: String by extra("5.5.0")
-        val markwonVersion: String by extra("4.4.0")
+        val kotlinVersion: String by extra("1.6.21")
+        val acraVersion: String by extra("5.9.3")
+        val markwonVersion: String by extra("4.6.2")
         val roomVersion: String by extra("2.2.3")
     }
 

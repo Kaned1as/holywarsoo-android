@@ -65,7 +65,7 @@ class EditMessageFragment: EditorFragment() {
     private suspend fun handleEdit() {
         val editId = requireArguments().getInt(EDIT_MESSAGE_ID_ARG)
 
-        val waitDialog = MaterialAlertDialogBuilder(context)
+        val waitDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.please_wait)
             .setMessage(R.string.loading)
             .create()
@@ -123,7 +123,7 @@ class EditMessageFragment: EditorFragment() {
         val messageId = requireArguments().getInt(EDIT_MESSAGE_ID_ARG)
         val contextKey = "${DB_CONTEXT_PREFIX}-${messageId}"
 
-        val waitDialog = MaterialAlertDialogBuilder(context)
+        val waitDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.please_wait)
             .setMessage(R.string.submitting)
             .create()

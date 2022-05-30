@@ -17,7 +17,7 @@ import com.kanedias.holywarsoo.model.TopicContentsModel
 import com.kanedias.holywarsoo.service.Network
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 
 /**
  * Fragment for showing contents of the topic, i.e. list of messages it contains.
@@ -40,9 +40,9 @@ class TopicContentFragment: FullscreenContentFragment() {
         val view = inflater.inflate(R.layout.fragment_contents, parent, false)
         ButterKnife.bind(this, view)
 
-        contents = ViewModelProviders.of(this).get(TopicContentsModel::class.java)
-        contents.topic.observe(this, Observer { contentView.adapter!!.notifyDataSetChanged() })
-        contents.topic.observe(this, Observer { refreshViews() })
+        contents = ViewModelProvider(this).get(TopicContentsModel::class.java)
+        contents.topic.observe(viewLifecycleOwner, Observer { contentView.adapter!!.notifyDataSetChanged() })
+        contents.topic.observe(viewLifecycleOwner, Observer { refreshViews() })
         contents.refreshed.value = false
 
         setupUI(contents)
@@ -58,7 +58,7 @@ class TopicContentFragment: FullscreenContentFragment() {
         val topic = contents.topic.value ?: return
 
         // highlight custom message if original query mentioned it
-        val messageId = HttpUrl.parse(topic.refererLink)!!.queryParameter("pid")
+        val messageId = topic.refererLink.toHttpUrl().queryParameter("pid")
         messageId?.let {
             highlightMessage(it.toInt())
             return

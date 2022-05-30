@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import butterknife.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -40,7 +40,7 @@ class LoginFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_login, container, false)
         ButterKnife.bind(this, view)
 
-        mainPageModel = ViewModelProviders.of(requireActivity()).get(MainPageModel::class.java)
+        mainPageModel = ViewModelProvider(requireActivity()).get(MainPageModel::class.java)
 
         progressDialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.please_wait)
@@ -72,7 +72,7 @@ class LoginFragment : Fragment() {
                 uiAction = {
                     Toast.makeText(requireContext(), R.string.login_successful, Toast.LENGTH_SHORT).show()
                     mainPageModel.account.value = Network.getUsername()
-                    fragmentManager?.popBackStack()
+                    parentFragmentManager.popBackStack()
                 }
             )
 

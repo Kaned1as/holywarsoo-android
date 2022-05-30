@@ -380,7 +380,7 @@ class ImageShowOverlay(ctx: Context,
 
                 override fun onResourceReady(resource: File, transition: Transition<in File>?) {
                     val downloadDir = Environment.DIRECTORY_DOWNLOADS
-                    val filename = resolved.pathSegments().last()
+                    val filename = resolved.pathSegments.last()
 
                     // on API >= 29 we must use media store API, direct access to SD-card is no longer available
                     val ostream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

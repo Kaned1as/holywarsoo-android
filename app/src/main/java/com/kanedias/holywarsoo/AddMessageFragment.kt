@@ -142,7 +142,7 @@ class AddMessageFragment: EditorFragment() {
         val topicId = requireArguments().getInt(TOPIC_ID_ARG)
         val contextKey = "${DB_CONTEXT_PREFIX}-${topicId}"
 
-        val waitDialog = MaterialAlertDialogBuilder(context)
+        val waitDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.please_wait)
             .setMessage(R.string.submitting)
             .create()

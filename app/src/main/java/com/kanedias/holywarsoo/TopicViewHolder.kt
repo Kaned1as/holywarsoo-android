@@ -4,8 +4,8 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -88,11 +88,11 @@ class TopicViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
         if (topic.newMessageUrl != null) {
             val color = itemView.resolveAttr(R.attr.colorPrimary)
             lastMessage.setTextColor(color)
-            lastMessage.supportCompoundDrawablesTintList = ColorStateList.valueOf(color)
+            TextViewCompat.setCompoundDrawableTintList(lastMessage, ColorStateList.valueOf(color))
         } else {
             val color = itemView.resolveAttr(R.attr.colorNonImportantText)
             lastMessage.setTextColor(color)
-            lastMessage.supportCompoundDrawablesTintList = ColorStateList.valueOf(color)
+            TextViewCompat.setCompoundDrawableTintList(lastMessage, ColorStateList.valueOf(color))
         }
 
         itemView.setOnClickListener {

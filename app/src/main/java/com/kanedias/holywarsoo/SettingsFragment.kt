@@ -28,7 +28,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 tintIcons(preference.getPreference(i), color)
             }
         } else {
-            preference.icon.setTint(color)
+            preference.icon?.setTint(color)
         }
     }
 }

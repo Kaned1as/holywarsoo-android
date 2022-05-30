@@ -20,6 +20,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -55,7 +59,7 @@ object Network {
 
     private const val USER_AGENT = "Holywarsoo Android ${BuildConfig.VERSION_NAME}"
     private const val IMGUR_CLIENT_AUTH = "Client-ID ${BuildConfig.IMGUR_API_KEY}"
-    private val MAIN_IMGUR_URL = HttpUrl.parse("https://api.imgur.com")!!
+    private val MAIN_IMGUR_URL = "https://api.imgur.com".toHttpUrl()
 
     private lateinit var MAIN_WEBSITE_URL: HttpUrl
     lateinit var FAVORITE_TOPICS_URL: String
@@ -90,7 +94,7 @@ object Network {
                 return@OnSharedPreferenceChangeListener
 
             // check validity of new homeserver
-            val isValid = HttpUrl.parse(Config.homeUrl) != null
+            val isValid = Config.homeUrl.toHttpUrlOrNull() != null
             if (!isValid) {
                 Toast.makeText(appCtx, R.string.invalid_home_server_endpoint, Toast.LENGTH_LONG).show()
                 Config.reset(appCtx)
@@ -120,7 +124,7 @@ object Network {
     }
 
     private fun setupEndpoints(url: String) {
-        MAIN_WEBSITE_URL = HttpUrl.parse(url)!!
+        MAIN_WEBSITE_URL = url.toHttpUrl()
         FAVORITE_TOPICS_URL = resolve("search.php?action=show_favorites")!!.toString()
         REPLIES_TOPICS_URL = resolve("search.php?action=show_replies")!!.toString()
         NEW_MESSAGES_TOPICS_URL = resolve("search.php?action=show_new")!!.toString()
@@ -130,7 +134,7 @@ object Network {
         OWN_MESSAGES_URL = resolve("search.php?action=show_user_posts")!!.toString()
     }
 
-    private fun authCookie() = cookiePersistor.loadAll().firstOrNull { it.name().startsWith("pun_cookie") }
+    private fun authCookie() = cookiePersistor.loadAll().firstOrNull { it.name.startsWith("pun_cookie") }
 
     fun resolve(url: String?): HttpUrl? {
         if (url.isNullOrEmpty())
@@ -140,12 +144,12 @@ object Network {
     }
 
     fun daysToAuthExpiration() = authCookie()
-        ?.let { (it.expiresAt() - System.currentTimeMillis()) / 1000 / 60 / 60 / 24 }
+        ?.let { (it.expiresAt - System.currentTimeMillis()) / 1000 / 60 / 60 / 24 }
         ?: 0L
 
     fun isLoggedIn() = cookiePersistor.loadAll()
-        .filter { it.name().startsWith("pun_cookie") }
-        .any { it.expiresAt() > System.currentTimeMillis() }
+        .filter { it.name.startsWith("pun_cookie") }
+        .any { it.expiresAt > System.currentTimeMillis() }
 
     fun getUsername() = accountInfo.getString(PREF_USERNAME, null)
 
@@ -181,9 +185,9 @@ object Network {
         val loginPageReq = Request.Builder().url(loginPageUrl).get().build()
         val loginPageResp = httpClient.newCall(loginPageReq).execute()
         if (!loginPageResp.isSuccessful)
-            throw IllegalStateException("Can't load login page: ${loginPageResp.message()}")
+            throw IllegalStateException("Can't load login page: ${loginPageResp.message}")
 
-        val loginPageHtml = loginPageResp.body()!!.string()
+        val loginPageHtml = loginPageResp.body!!.string()
         val loginPageDoc = Jsoup.parse(loginPageHtml)
 
         val loginFormInputs =  loginPageDoc.select("form#login input[type=hidden]")
@@ -207,7 +211,7 @@ object Network {
 
         val loginResp = httpClient.newCall(loginReq).execute()
         if (!loginResp.isSuccessful)
-            throw IOException("Can't authenticate: ${loginResp.message()}")
+            throw IOException("Can't authenticate: ${loginResp.message}")
 
         if (authCookie() == null)
             throw IOException("Authentication failed, invalid login/password")
@@ -229,9 +233,9 @@ object Network {
         val req = Request.Builder().url(MAIN_WEBSITE_URL).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load main page: ${resp.message()}")
+            throw IOException("Can't load main page: ${resp.message}")
 
-        val html = resp.body()!!.string()
+        val html = resp.body!!.string()
         val doc = Jsoup.parse(html)
 
         val forumBoards = doc.select("div#brdmain > div.blocktable")
@@ -262,9 +266,9 @@ object Network {
         val req = Request.Builder().url(replyWithQuoteUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load message quote: ${resp.message()}")
+            throw IOException("Can't load message quote: ${resp.message}")
 
-        val html = resp.body()!!.string()
+        val html = resp.body!!.string()
         val doc = Jsoup.parse(html)
 
         return doc.select("form#post textarea[name=req_message]").text()
@@ -281,14 +285,14 @@ object Network {
      */
     @Throws(IOException::class)
     fun loadSearchTopicResults(searchLink: String, page: Int = 1): SearchResults<ForumTopicDesc> {
-        val pageUrl = HttpUrl.parse(searchLink)!!.newBuilder().addQueryParameter("p", page.toString()).build()
+        val pageUrl = searchLink.toHttpUrl().newBuilder().addQueryParameter("p", page.toString()).build()
 
         val req = Request.Builder().url(pageUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load forum contents: ${resp.message()}")
+            throw IOException("Can't load forum contents: ${resp.message}")
 
-        val html = resp.body()!!.string()
+        val html = resp.body!!.string()
         val doc = Jsoup.parse(html)
 
         val pageName = doc.select("head title").text()
@@ -305,12 +309,12 @@ object Network {
         val currentPage = pageLinks.select("strong").text()
         val pageCount = pageLinks.first().children()
             .mapNotNull { it.ownText().trySanitizeInt() }
-            .max()
+            .maxOrNull() ?: 0
 
         return SearchResults(
             link = searchLink,
             name = searchPageName,
-            pageCount = pageCount!!,
+            pageCount = pageCount,
             currentPage = currentPage.sanitizeInt(),
             results = topics
         )
@@ -330,7 +334,7 @@ object Network {
      */
     @Throws(IOException::class)
     fun loadSearchMessagesResults(searchLink: String? = null, searchKeyword: String? = null, page: Int = 1): SearchResults<ForumMessage> {
-        val pageUrl = searchLink?.let { HttpUrl.parse(it)!!.newBuilder()
+        val pageUrl = searchLink?.let { it.toHttpUrl().newBuilder()
                 .addQueryParameter("sort_dir", "DESC")
                 .addQueryParameter("p", page.toString())
                 .build() }
@@ -345,9 +349,9 @@ object Network {
         val req = Request.Builder().url(pageUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load search page contents: ${resp.message()}")
+            throw IOException("Can't load search page contents: ${resp.message}")
 
-        val html = resp.body()!!.string()
+        val html = resp.body!!.string()
         val doc = Jsoup.parse(html)
 
         val pageName = doc.select("head title").text()
@@ -364,12 +368,12 @@ object Network {
         val currentPage = pageLinks.select("strong").text()
         val pageCount = pageLinks.first().children()
             .mapNotNull { it.ownText().trySanitizeInt() }
-            .max()
+            .maxOrNull() ?: 0
 
         return SearchResults(
             link = pageUrl.toString(),
             name = searchPageName,
-            pageCount = pageCount!!,
+            pageCount = pageCount,
             currentPage = currentPage.sanitizeInt(),
             results = messages
         )
@@ -388,16 +392,16 @@ object Network {
      */
     @Throws(IOException::class)
     fun loadForumContents(forumLink: String? = null, customLink: String? = null, page: Int = 1): Forum {
-        val pageUrl = customLink?.let { HttpUrl.parse(it) }
-            ?: forumLink?.let {  HttpUrl.parse(it)!!.newBuilder().addQueryParameter("p", page.toString()).build() }
+        val pageUrl = customLink?.toHttpUrl()
+            ?: forumLink?.toHttpUrl()?.newBuilder()?.addQueryParameter("p", page.toString())?.build()
             ?: throw IllegalStateException("Both forum link and custom link are null!")
 
         val req = Request.Builder().url(pageUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load forum contents: ${resp.message()}")
+            throw IOException("Can't load forum contents: ${resp.message}")
 
-        val html = resp.body()!!.string()
+        val html = resp.body!!.string()
         val doc = Jsoup.parse(html)
 
         val subforums = parseForums(doc.select("div.subforumlist").first())
@@ -416,14 +420,14 @@ object Network {
         val currentPage = pageLinks.select("strong").text()
         val pageCount = pageLinks.children()
             .mapNotNull { it.ownText().trySanitizeInt() }
-            .max()
+            .maxOrNull() ?: 0
 
         return Forum(
             id = forumId.sanitizeInt(),
             name = forumName,
             link = resolve(forumRef)!!.toString(),
             isWritable = forumWritable.isNotEmpty(),
-            pageCount = pageCount!!,
+            pageCount = pageCount,
             currentPage = currentPage.sanitizeInt(),
             subforums = subforums,
             topics = topics
@@ -442,16 +446,16 @@ object Network {
      */
     @Throws(IOException::class)
     fun loadTopicContents(topicLink: String? = null, customLink: String? = null, page: Int = 1): ForumTopic {
-        val pageUrl = customLink?.let { HttpUrl.parse(it) }
-            ?: topicLink?.let { HttpUrl.parse(it)!!.newBuilder().addQueryParameter("p", page.toString()).build() }
+        val pageUrl = customLink?.toHttpUrl()
+            ?: topicLink?.toHttpUrl()?.newBuilder()?.addQueryParameter("p", page.toString())?.build()
             ?: throw IllegalStateException("Both forum link and custom link are null!")
 
         val req = Request.Builder().url(pageUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load topic contents: ${resp.message()}")
+            throw IOException("Can't load topic contents: ${resp.message}")
 
-        val html = resp.body()!!.string()
+        val html = resp.body!!.string()
         val doc = Jsoup.parse(html)
 
         // topic link is in the page header, topic id can be derived from it
@@ -471,7 +475,7 @@ object Network {
         val currentPage = pageLinks.select("strong").text()
         val pageCount = pageLinks.children()
             .mapNotNull { it.ownText().trySanitizeInt() }
-            .max()
+            .maxOrNull() ?: 0
 
         // delete action from the switchable links so they can be reused in any context
         val topicFavoriteLink = resolve(topicFavorite.attr("href"))?.newBuilder()
@@ -485,13 +489,13 @@ object Network {
             id = topicId.sanitizeInt(),
             name = topicName,
             link = resolve(topicRef)!!.toString(),
-            refererLink = resp.request().url().toString(),
+            refererLink = resp.request.url.toString(),
             isWritable = topicWritable.isNotEmpty(),
             isFavorite = topicFavorite.attr("href").contains("unfavorite"),
             favoriteLink = topicFavoriteLink,
             isSubscribed = topicSubscribe.attr("href").contains("unsubscribe"),
             subscriptionLink = topicSubscribeLink,
-            pageCount = pageCount!!,
+            pageCount = pageCount,
             currentPage = currentPage.sanitizeInt(),
             messages = messages
         )
@@ -523,9 +527,9 @@ object Network {
         val req = Request.Builder().url(editUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load message edit page: ${resp.message()}")
+            throw IOException("Can't load message edit page: ${resp.message}")
 
-        val editPageHtml = resp.body()!!.string()
+        val editPageHtml = resp.body!!.string()
         val editPageDoc = Jsoup.parse(editPageHtml)
 
         val editSubject = editPageDoc.select("form#edit textarea[name=req_subject]").text()
@@ -547,9 +551,9 @@ object Network {
         val req = Request.Builder().url(editUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load message edit page: ${resp.message()}")
+            throw IOException("Can't load message edit page: ${resp.message}")
 
-        val editPageHtml = resp.body()!!.string()
+        val editPageHtml = resp.body!!.string()
         val editPageDoc = Jsoup.parse(editPageHtml)
 
         val editPageInputs = editPageDoc.select("form#edit input[type=hidden]")
@@ -578,7 +582,7 @@ object Network {
             throw IOException("Unexpected failure")
 
         // this is a redirect link page, such as "Message saved, please wait to be redirected"
-        val editMessageHtml = editMessageResp.body()!!.string()
+        val editMessageHtml = editMessageResp.body!!.string()
         val editMessageDoc = Jsoup.parse(editMessageHtml)
 
         // we need to extract link from it
@@ -599,9 +603,9 @@ object Network {
         val req = Request.Builder().url(deleteUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load message edit page: ${resp.message()}")
+            throw IOException("Can't load message edit page: ${resp.message}")
 
-        val deletePageHtml = resp.body()!!.string()
+        val deletePageHtml = resp.body!!.string()
         val deletePageDoc = Jsoup.parse(deletePageHtml)
 
         val deletePageInputs = deletePageDoc.select("form[action^=delete] input")
@@ -624,7 +628,7 @@ object Network {
             throw IOException("Unexpected failure")
 
         // this is a redirect link page, such as "Message saved, please wait to be redirected"
-        val deleteMessageHtml = deleteMessageResp.body()!!.string()
+        val deleteMessageHtml = deleteMessageResp.body!!.string()
         val deleteMessageDoc = Jsoup.parse(deleteMessageHtml)
 
         // we need to extract link from it
@@ -639,9 +643,9 @@ object Network {
         val req = Request.Builder().url(postUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load topic reply page: ${resp.message()}")
+            throw IOException("Can't load topic reply page: ${resp.message}")
 
-        val replyPageHtml = resp.body()!!.string()
+        val replyPageHtml = resp.body!!.string()
         val replyPageDoc = Jsoup.parse(replyPageHtml)
 
         val replyPageInputs = replyPageDoc.select("form#post input[type=hidden]")
@@ -666,7 +670,7 @@ object Network {
             throw IOException("Unexpected failure")
 
         // this is a redirect link page, such as "Message saved, please wait to be redirected"
-        val postMessageHtml = postMessageResp.body()!!.string()
+        val postMessageHtml = postMessageResp.body!!.string()
         val postMessageDoc = Jsoup.parse(postMessageHtml)
 
         // we need to extract link from it
@@ -681,9 +685,9 @@ object Network {
         val req = Request.Builder().url(postUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load topic create page: ${resp.message()}")
+            throw IOException("Can't load topic create page: ${resp.message}")
 
-        val postPageHtml = resp.body()!!.string()
+        val postPageHtml = resp.body!!.string()
         val postPageDoc = Jsoup.parse(postPageHtml)
 
         val postPageInputs = postPageDoc.select("form#post input[type=hidden]")
@@ -709,7 +713,7 @@ object Network {
             throw IOException("Unexpected failure")
 
         // this is a redirect link page, such as "Message saved, please wait to be redirected"
-        val postTopicHtml = postTopicResp.body()!!.string()
+        val postTopicHtml = postTopicResp.body!!.string()
         val postTopicDoc = Jsoup.parse(postTopicHtml)
 
         // we need to extract link from it
@@ -724,9 +728,9 @@ object Network {
         val req = Request.Builder().url(postUrl).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't load report message page: ${resp.message()}")
+            throw IOException("Can't load report message page: ${resp.message}")
 
-        val postPageHtml = resp.body()!!.string()
+        val postPageHtml = resp.body!!.string()
         val postPageDoc = Jsoup.parse(postPageHtml)
 
         val postPageInputs = postPageDoc.select("form#report input[type=hidden]")
@@ -767,7 +771,7 @@ object Network {
         val req = Request.Builder().url(url).get().build()
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't $action: ${resp.message()}")
+            throw IOException("Can't $action: ${resp.message}")
     }
 
     /**
@@ -780,7 +784,7 @@ object Network {
     fun uploadImage(imageBytes: ByteArray): String {
         val url = MAIN_IMGUR_URL.resolve("/3/image")!!
 
-        val uploadForm = RequestBody.create(MediaType.parse("image/*"), imageBytes)
+        val uploadForm = imageBytes.toRequestBody("image/*".toMediaType())
         val reqBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart("type", "file")
@@ -794,9 +798,9 @@ object Network {
 
         val resp = httpClient.newCall(req).execute()
         if (!resp.isSuccessful)
-            throw IOException("Can't upload image: ${resp.message()}")
+            throw IOException("Can't upload image: ${resp.message}")
 
-        val respJson = JSONObject(resp.body()!!.string())
+        val respJson = JSONObject(resp.body!!.string())
         return respJson.getJSONObject("data").getString("link")
     }
 
@@ -926,7 +930,7 @@ object Network {
             val isClosed = topic.classNames().contains("iclosed")
             val topicPageCount = topic.select("td.tcl span.pagestext a:last-child").text()
 
-            val topicReplies = repliesClass?.let { topic.select("td.${it}").text() }
+            val topicReplies = repliesClass.let { topic.select("td.${it}").text() }
             val topicViews = viewsClass?.let { topic.select("td.${it}").text() }
 
             val lastMessageLink = topic.select("td.tcr > a").first()

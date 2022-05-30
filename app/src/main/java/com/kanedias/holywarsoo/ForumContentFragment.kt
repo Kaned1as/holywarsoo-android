@@ -5,8 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
@@ -35,9 +34,9 @@ class ForumContentFragment: FullscreenContentFragment() {
         val view = inflater.inflate(R.layout.fragment_contents, parent, false)
         ButterKnife.bind(this, view)
 
-        contents = ViewModelProviders.of(this).get(ForumContentsModel::class.java)
-        contents.forum.observe(this, Observer { contentView.adapter = ForumContentsAdapter(it) })
-        contents.forum.observe(this, Observer { refreshViews() })
+        contents = ViewModelProvider(this).get(ForumContentsModel::class.java)
+        contents.forum.observe(viewLifecycleOwner) { contentView.adapter = ForumContentsAdapter(it) }
+        contents.forum.observe(viewLifecycleOwner) { refreshViews() }
         contents.refreshed.value = false
 
         setupUI(contents)
@@ -62,7 +61,7 @@ class ForumContentFragment: FullscreenContentFragment() {
                 val frag = AddTopicFragment().apply {
                     arguments = Bundle().apply { putSerializable(AddTopicFragment.FORUM_ID_ARG, forum.id) }
                 }
-                frag.show(fragmentManager!!, "topic create fragment")
+                frag.show(parentFragmentManager, "topic create fragment")
             }
         } else {
             actionButton.visibility = View.GONE

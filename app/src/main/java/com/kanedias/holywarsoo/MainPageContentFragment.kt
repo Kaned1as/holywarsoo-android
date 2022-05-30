@@ -4,8 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,9 +43,9 @@ class MainPageContentFragment: ContentFragment() {
         forumListRefresher.setColorSchemeColors(requireContext().resolveAttr(R.attr.colorSecondary))
         forumListRefresher.setProgressBackgroundColorSchemeColor(requireContext().resolveAttr(R.attr.colorPrimary))
 
-        contents = ViewModelProviders.of(requireActivity()).get(MainPageModel::class.java)
-        contents.forums.observe(this, Observer { forumList.adapter = ForumListAdapter(it) })
-        contents.forums.observe(this, Observer { refreshViews() })
+        contents = ViewModelProvider(requireActivity()).get(MainPageModel::class.java)
+        contents.forums.observe(viewLifecycleOwner) { forumList.adapter = ForumListAdapter(it) }
+        contents.forums.observe(viewLifecycleOwner) { refreshViews() }
 
         refreshContent()
 

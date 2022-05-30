@@ -4,13 +4,12 @@ import android.app.Application
 import android.content.Context
 import com.kanedias.holywarsoo.service.Config
 import com.kanedias.holywarsoo.service.Database
-import org.acra.ACRA
-import org.acra.annotation.AcraCore
-import org.acra.annotation.AcraDialog
-import org.acra.annotation.AcraMailSender
 import org.acra.data.StringFormat
 import com.kanedias.holywarsoo.service.Network
 import com.kanedias.holywarsoo.service.SmiliesCache
+import org.acra.config.dialog
+import org.acra.config.mailSender
+import org.acra.ktx.initAcra
 
 
 /**
@@ -21,16 +20,29 @@ import com.kanedias.holywarsoo.service.SmiliesCache
  *
  * Created on 2019-12-27
  */
-@AcraDialog(resIcon = R.drawable.ic_launcher_round, resText = R.string.app_crashed, resCommentPrompt = R.string.leave_crash_comment, resTheme = R.style.FireTheme)
-@AcraMailSender(mailTo = "kanedias@xaker.ru", resSubject = R.string.app_crash_report, reportFileName = "crash-report.json")
-@AcraCore(buildConfigClass = BuildConfig::class, reportFormat = StringFormat.JSON, alsoReportToAndroidFramework = true)
 class MainApplication : Application() {
 
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
 
-        // init crash reporting
-        ACRA.init(this)
+        initAcra {
+            alsoReportToAndroidFramework = true
+            buildConfigClass = BuildConfig::class.java
+            reportFormat = StringFormat.JSON
+
+            dialog {
+                resIcon = R.drawable.ic_launcher_round
+                withText(getString(R.string.app_crashed))
+                withCommentPrompt(getString(R.string.leave_crash_comment))
+                withResTheme(R.style.FireTheme)
+            }
+
+            mailSender {
+                mailTo = "kanedias@gmx.net"
+                reportFileName = "crash-report.json"
+                withSubject(getString(R.string.app_crash_report))
+            }
+        }
     }
 
     override fun onCreate() {

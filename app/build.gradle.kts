@@ -151,19 +151,19 @@ play {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8", "1.3.61"))
+    implementation(kotlin("stdlib-jdk8", "1.6.21"))
 
-    implementation("androidx.appcompat:appcompat:1.1.0")
-    implementation("androidx.constraintlayout:constraintlayout:1.1.3")           // constaint layout view
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")       // swipe-to-refresh layout view
+    implementation("androidx.appcompat:appcompat:1.4.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")           // constaint layout view
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")       // swipe-to-refresh layout view
     implementation("androidx.cardview:cardview:1.0.0")                           // snappy cardview for lists
-    implementation("androidx.preference:preference:1.1.0")                       // preference fragment compatibility
-    implementation("androidx.lifecycle:lifecycle-extensions:2.1.0")              // view-model providers
-    implementation("com.google.android.material:material:1.2.0-alpha03")         // Material design support lib
+    implementation("androidx.preference:preference:1.2.0")                       // preference fragment compatibility
+    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")              // view-model providers
+    implementation("com.google.android.material:material:1.7.0-alpha02")         // Material design support lib
     implementation("androidx.room:room-runtime:${extra["roomVersion"]}")         // SQLite ORM lib
 
     implementation("com.jakewharton:butterknife:10.2.0")                         // Annotation processor
-    implementation("com.squareup.okhttp3:okhttp:3.14.2")                         // android http client
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")                         // android http client
     implementation("com.github.franmontiel:PersistentCookieJar:v1.0.1")          // cookie support
     implementation("com.github.stfalcon:stfalcon-imageviewer:0.1.0")             // embedded image viewer
     implementation("com.r0adkll:slidableactivity:2.1.0")                         // fragment swipe right to go back action
@@ -178,11 +178,11 @@ dependencies {
     implementation("io.noties.markwon:ext-tables:${extra["markwonVersion"]}")
     implementation("io.noties.markwon:ext-strikethrough:${extra["markwonVersion"]}")
 
-    implementation("org.jsoup:jsoup:1.12.1")                                     // HTML parser
+    implementation("org.jsoup:jsoup:1.13.1")                                     // HTML parser
 
     // kotlin extensions
-    implementation("androidx.core:core-ktx:1.1.0")                               // kotlin support for androidx
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-rc03")        // coroutines in lifecycles
+    implementation("androidx.core:core-ktx:1.7.0")                               // kotlin support for androidx
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.0-rc01")        // coroutines in lifecycles
     implementation("androidx.room:room-ktx:${extra["roomVersion"]}")             // coroutines/transactions in orm
 
     // annotation processors
@@ -190,6 +190,6 @@ dependencies {
     kapt("androidx.room:room-compiler:${extra["roomVersion"]}")                  // database schema
 
     testImplementation("junit:junit:4.12")
-    androidTestImplementation("androidx.test.ext:junit:1.1.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.2.0")
+    androidTestImplementation("androidx.test.ext:junit:1.1.3")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 }

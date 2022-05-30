@@ -15,6 +15,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
@@ -23,7 +24,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.kanedias.holywarsoo.service.Network
 import com.kanedias.holywarsoo.service.SmiliesCache
 import kotlinx.coroutines.*
-import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 
 /**
  * Fragment to hold all editing-related functions in all edit views where possible.
@@ -172,7 +173,7 @@ class EditorViews(private val parent: Fragment, private val iv: View) {
                 .setMessage(R.string.uploading)
                 .create()
 
-        GlobalScope.launch(Dispatchers.Main) {
+        parent.lifecycleScope.launch(Dispatchers.Main) {
             dialog.show()
 
             Network.perform(
@@ -185,9 +186,9 @@ class EditorViews(private val parent: Fragment, private val iv: View) {
     }
 
     private fun showSelectDimensionsDialog(link: String) {
-        val imgUrl = HttpUrl.parse(link)!! // will be https://i.imgur.com/12345.png
-        val fileNamePos = imgUrl.pathSegments().size - 1
-        val fileNameFull = imgUrl.pathSegments().last() // get 12345.png
+        val imgUrl = link.toHttpUrl() // will be https://i.imgur.com/12345.png
+        val fileNamePos = imgUrl.pathSegments.size - 1
+        val fileNameFull = imgUrl.pathSegments.last() // get 12345.png
         if (!fileNameFull.contains('.')) {
             // imgur API changed? just insert as-is
             insertInCursorPosition("[img]", link, "[/img]")
