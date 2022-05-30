@@ -11,9 +11,8 @@ plugins {
     id("com.palantir.git-version").version("0.11.0")
     id("com.github.triplet.play").version("2.6.2")
 
-    id("kotlin-android")
-    id("kotlin-android-extensions")
-    id("kotlin-kapt")
+    kotlin("android")
+    kotlin("kapt")
 }
 
 repositories {
@@ -27,28 +26,30 @@ fun versionDetails() = (extra["versionDetails"] as groovy.lang.Closure<*>)() as 
 fun gitVersion() = (extra["gitVersion"] as groovy.lang.Closure<*>)() as String
 
 android {
-    compileSdkVersion(29)
-    ndkVersion = "21.3.6528147"
+    compileSdk = 31
+    ndkVersion = "22.1.7171670"
 
+    namespace = "com.kanedias.holywarsoo"
     defaultConfig {
         applicationId = "com.kanedias.holywarsoo"
-        manifestPlaceholders = mapOf("mainHost" to "holywarsoo.net")
-        minSdkVersion(21)
-        targetSdkVersion(29)
+        manifestPlaceholders["mainHost"] = "holywarsoo.net"
+        minSdk = 24
+        targetSdk = 31
         versionCode = 30
         versionName = "1.5.10"
-        vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = mapOf(
-                    "room.schemaLocation" to "$projectDir/src/main/db-schemas",
-                    "room.incremental" to "true",
-                    "room.expandProjection" to "true"
-                )
+                arguments["room.schemaLocation"] = "$projectDir/src/main/db-schemas"
+                arguments["room.incremental"] = "true"
+                arguments["room.expandProjection"] = "true"
             }
         }
+    }
+
+    buildFeatures {
+        viewBinding = true
     }
 
     signingConfigs {
@@ -75,37 +76,39 @@ android {
 
     splits {
         abi {
-            setEnable(true)
+            isEnable = true
             reset()
             include("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
 
             // don't produce universal apk if publishing to google play
             // as all architectures are covered by existing splits
             val gplayPublishing = project.hasProperty("gplayReleaseType")
-            setUniversalApk(!gplayPublishing)
+            isUniversalApk = !gplayPublishing
         }
     }
 
-    flavorDimensions("purity")
+    flavorDimensions += listOf("purity")
     productFlavors {
         create("fdroid") {
-            setDimension("purity")
+            dimension = "purity"
         }
 
         create("googleplay") {
-            setDimension("purity")
+            dimension = "purity"
         }
     }
 
     applicationVariants.all {
         val imgurApiKey = System.getenv("IMGUR_API_KEY").orEmpty()
+        val versionCode = android.defaultConfig.versionCode!!
+
         buildConfigField("String", "IMGUR_API_KEY", "\"$imgurApiKey\"")
+        buildConfigField("int", "VANILLA_VERSION_CODE", versionCode.toString())
 
         outputs.forEach { output ->
             val outputApk = output as ApkVariantOutputImpl
 
             // user-supplied code
-            val versionCode = android.defaultConfig.versionCode!!
 
             // code based on ABI
             val versionCodes = mapOf(
@@ -131,7 +134,6 @@ android {
                 else -> 0
             }
 
-            buildConfigField("int", "VANILLA_VERSION_CODE", versionCode.toString())
             outputApk.versionCodeOverride = versionCode * 10000 + playVersionCode * 1000 + gitVersionCode * 10 + abiVersionCode
             outputApk.versionNameOverride = gitVersion().replace(".dirty", "")
         }
