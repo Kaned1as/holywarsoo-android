@@ -9,7 +9,7 @@ plugins {
     id("com.android.application")
 
     id("com.palantir.git-version").version("0.11.0")
-    id("com.github.triplet.play").version("2.6.2")
+    id("com.github.triplet.play").version("3.6.0")
 
     kotlin("android")
     kotlin("kapt")
@@ -126,8 +126,8 @@ android {
 
             // production code should be higher than alpha so it can substitute it on release publish
             // (google play requirement)
-            val playVersionCode = when (play.track) {
-                "internal" -> 1
+            val playVersionCode = when (play.track.get()) {
+                "internal"-> 1
                 "alpha" -> 2
                 "beta" -> 3
                 "production" -> 4
@@ -146,8 +146,8 @@ kapt {
 }
 
 play {
-    serviceAccountCredentials = file("misc/android-publisher-account.json")
-    track = project.findProperty("gplayReleaseType").toString()
+    serviceAccountCredentials.set(file("misc/android-publisher-account.json"))
+    track.set(project.findProperty("gplayReleaseType").toString())
 }
 
 dependencies {
