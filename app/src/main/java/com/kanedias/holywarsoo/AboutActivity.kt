@@ -2,9 +2,7 @@ package com.kanedias.holywarsoo
 
 import android.os.Bundle
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.appcompat.widget.Toolbar
-import butterknife.BindView
-import butterknife.ButterKnife
+import com.kanedias.holywarsoo.databinding.ActivityAboutBinding
 
 /**
  * Activity for showing "About this app" info
@@ -15,18 +13,17 @@ import butterknife.ButterKnife
  */
 class AboutActivity: ThemedActivity() {
 
-    @BindView(R.id.about_toolbar)
-    lateinit var aboutToolbar: Toolbar
+    private lateinit var binding: ActivityAboutBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_about)
-        ButterKnife.bind(this)
+        binding = ActivityAboutBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        aboutToolbar.title = getString(R.string.app_name)
-        aboutToolbar.navigationIcon = DrawerArrowDrawable(this).apply { progress = 1.0f }
-        aboutToolbar.setNavigationOnClickListener { finish() }
+        binding.aboutToolbar.title = getString(R.string.app_name)
+        binding.aboutToolbar.navigationIcon = DrawerArrowDrawable(this).apply { progress = 1.0f }
+        binding.aboutToolbar.setNavigationOnClickListener { finish() }
     }
 
 }

@@ -1,15 +1,8 @@
 package com.kanedias.holywarsoo
 
-import android.content.SharedPreferences
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.appcompat.widget.Toolbar
-import androidx.lifecycle.lifecycleScope
-import butterknife.BindView
-import butterknife.ButterKnife
-import com.kanedias.holywarsoo.misc.setupTheme
-import com.kanedias.holywarsoo.service.Config
+import com.kanedias.holywarsoo.databinding.ActivityPreferencesBinding
 
 /**
  * Activity for holding and showing preference fragments
@@ -20,18 +13,15 @@ import com.kanedias.holywarsoo.service.Config
  */
 class SettingsActivity: ThemedActivity() {
 
-    @BindView(R.id.pref_toolbar)
-    lateinit var prefToolbar: Toolbar
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_preferences)
-        ButterKnife.bind(this)
+        val binding = ActivityPreferencesBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        prefToolbar.title = getString(R.string.menu_settings)
-        prefToolbar.navigationIcon = DrawerArrowDrawable(this).apply { progress = 1.0f }
-        prefToolbar.setNavigationOnClickListener { finish() }
+        binding.prefToolbar.title = getString(R.string.menu_settings)
+        binding.prefToolbar.navigationIcon = DrawerArrowDrawable(this).apply { progress = 1.0f }
+        binding.prefToolbar.setNavigationOnClickListener { finish() }
     }
 
 }

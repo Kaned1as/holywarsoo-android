@@ -8,9 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import butterknife.BindView
-import butterknife.ButterKnife
+import com.kanedias.holywarsoo.databinding.FragmentMainContentsBinding
 import com.kanedias.holywarsoo.dto.ForumDesc
 import com.kanedias.holywarsoo.misc.resolveAttr
 import com.kanedias.holywarsoo.model.MainPageModel
@@ -25,37 +23,31 @@ import com.kanedias.holywarsoo.service.Network
  */
 class MainPageContentFragment: ContentFragment() {
 
-    @BindView(R.id.main_forum_list_scroll_area)
-    lateinit var forumListRefresher: SwipeRefreshLayout
-
-    @BindView(R.id.main_forum_list)
-    lateinit var forumList: RecyclerView
-
-    lateinit var contents: MainPageModel
+    private lateinit var binding: FragmentMainContentsBinding
+    private lateinit var contents: MainPageModel
 
     override fun onCreateView(inflater: LayoutInflater, parent: ViewGroup?, state: Bundle?): View {
-        val view = inflater.inflate(R.layout.fragment_main_contents, parent, false)
-        ButterKnife.bind(this, view)
+        binding = FragmentMainContentsBinding.inflate(inflater, parent, false)
 
-        forumList.layoutManager = LinearLayoutManager(context)
+        binding.mainForumList.layoutManager = LinearLayoutManager(context)
 
-        forumListRefresher.setOnRefreshListener { refreshContent() }
-        forumListRefresher.setColorSchemeColors(requireContext().resolveAttr(R.attr.colorSecondary))
-        forumListRefresher.setProgressBackgroundColorSchemeColor(requireContext().resolveAttr(R.attr.colorPrimary))
+        binding.mainForumListScrollArea.setOnRefreshListener { refreshContent() }
+        binding.mainForumListScrollArea.setColorSchemeColors(requireContext().resolveAttr(R.attr.colorSecondary))
+        binding.mainForumListScrollArea.setProgressBackgroundColorSchemeColor(requireContext().resolveAttr(R.attr.colorPrimary))
 
         contents = ViewModelProvider(requireActivity()).get(MainPageModel::class.java)
-        contents.forums.observe(viewLifecycleOwner) { forumList.adapter = ForumListAdapter(it) }
+        contents.forums.observe(viewLifecycleOwner) { binding.mainForumList.adapter = ForumListAdapter(it) }
         contents.forums.observe(viewLifecycleOwner) { refreshViews() }
 
         refreshContent()
 
-        return view
+        return binding.root
     }
 
     override fun refreshViews() {
         val activity = activity as? MainActivity ?: return
 
-        activity.toolbar.apply {
+        activity.binding.mainToolbar.apply {
             title = getString(R.string.app_name)
             subtitle = ""
         }
@@ -63,14 +55,14 @@ class MainPageContentFragment: ContentFragment() {
 
     override fun refreshContent() {
         lifecycleScope.launchWhenResumed {
-            forumListRefresher.isRefreshing = true
+            binding.mainForumListScrollArea.isRefreshing = true
 
             Network.perform(
                 networkAction = { Network.loadForumList() },
                 uiAction = { loaded -> contents.forums.value = loaded }
             )
 
-            forumListRefresher.isRefreshing = false
+            binding.mainForumListScrollArea.isRefreshing = false
         }
     }
 
@@ -95,9 +87,9 @@ class MainPageContentFragment: ContentFragment() {
             // show category if it's changed
             val categoryChanged = position > 0 && forum.category != forumDescList[position - 1].category
             if (forum.category != null && (position == 0 || categoryChanged)) {
-                holder.forumCategoryArea.visibility = View.VISIBLE
+                holder.binding.forumListItemSeparator.visibility = View.VISIBLE
             } else {
-                holder.forumCategoryArea.visibility = View.GONE
+                holder.binding.forumListItemSeparator.visibility = View.GONE
             }
         }
 

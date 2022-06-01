@@ -34,7 +34,7 @@ open class EditorFragment: BottomSheetDialogFragment() {
         if (requestCode == EditorViews.PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD) {
             val result = permissions.filterIndexed { idx, pm -> pm == Manifest.permission.WRITE_EXTERNAL_STORAGE && grantResults[idx] == PackageManager.PERMISSION_GRANTED }
             when (result.any()) {
-                true -> editor.uploadImage(editor.imageUpload)
+                true -> editor.uploadImage(editor.binding.editQuickImage)
                 false -> Toast.makeText(requireContext(), R.string.no_permissions, Toast.LENGTH_SHORT).show()
             }
         }

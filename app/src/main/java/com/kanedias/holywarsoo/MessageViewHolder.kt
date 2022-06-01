@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.*
 import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -16,12 +14,12 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.iterator
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.kanedias.holywarsoo.databinding.FragmentTopicMessageListItemBinding
+import com.kanedias.holywarsoo.databinding.ViewMessageContentBinding
 import com.kanedias.holywarsoo.dto.ForumMessage
 import com.kanedias.holywarsoo.dto.ForumTopic
 import com.kanedias.holywarsoo.markdown.handleMarkdown
@@ -42,31 +40,16 @@ import java.util.*
  *
  * Created on 2019-12-22
  */
+@Suppress("LeakingThis")
 open class MessageViewHolder(private val parent: FullscreenContentFragment, iv: View) : RecyclerView.ViewHolder(iv) {
 
-    @BindView(R.id.message_area)
     lateinit var messageArea: MaterialCardView
+    lateinit var contentBinding: ViewMessageContentBinding
 
-    @BindView(R.id.message_author_avatar)
-    lateinit var messageAvatar: ImageView
-
-    @BindView(R.id.message_author_name)
-    lateinit var messageAuthorName: TextView
-
-    @BindView(R.id.message_date)
-    lateinit var messageDate: TextView
-
-    @BindView(R.id.message_index)
-    lateinit var messageIndex: TextView
-
-    @BindView(R.id.message_body)
-    lateinit var messageBody: TextView
-
-    @BindView(R.id.message_overflow_menu)
-    lateinit var messageMenu: ImageView
-
-    init {
-        ButterKnife.bind(this, iv)
+    open fun initBinding() {
+        val holderBinding = FragmentTopicMessageListItemBinding.bind(itemView)
+        contentBinding = ViewMessageContentBinding.bind(holderBinding.root)
+        messageArea = holderBinding.messageArea
     }
 
     /**
@@ -80,36 +63,36 @@ open class MessageViewHolder(private val parent: FullscreenContentFragment, iv: 
         }
 
         if (message.authorAvatarUrl != null) {
-            messageAvatar.layoutVisibilityBool = true
-            Glide.with(messageAvatar)
+            contentBinding.messageAuthorAvatar.layoutVisibilityBool = true
+            Glide.with(contentBinding.messageAuthorAvatar)
                 .load(message.authorAvatarUrl)
                 .apply(RequestOptions()
                     .centerInside()
                     .circleCrop())
-                .into(messageAvatar)
+                .into(contentBinding.messageAuthorAvatar)
         } else {
-            messageAvatar.layoutVisibilityBool = false
+            contentBinding.messageAuthorAvatar.layoutVisibilityBool = false
         }
 
-        messageAuthorName.text = message.author
-        messageIndex.text = "#${message.index}"
+        contentBinding.messageAuthorName.text = message.author
+        contentBinding.messageIndex.text = "#${message.index}"
 
         try {
             val creationDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(message.createdDate)!!
-            messageDate.text = DateUtils.getRelativeTimeSpanString(creationDate.time)
-            messageDate.setOnClickListener { it.showToast(message.createdDate) }
+            contentBinding.messageDate.text = DateUtils.getRelativeTimeSpanString(creationDate.time)
+            contentBinding.messageDate.setOnClickListener { it.showToast(message.createdDate) }
         } catch (ex: ParseException) {
-            messageDate.text = message.createdDate
-            messageDate.isClickable = false
+            contentBinding.messageDate.text = message.createdDate
+            contentBinding.messageDate.isClickable = false
         }
 
-        messageBody.handleMarkdown(message.content)
+        contentBinding.messageBody.handleMarkdown(message.content)
 
         // make text selectable
         // XXX: this is MAGIC: see https://stackoverflow.com/a/56224791/1696844
-        messageBody.setTextIsSelectable(false)
-        messageBody.measure(-1, -1)
-        messageBody.setTextIsSelectable(true)
+        contentBinding.messageBody.setTextIsSelectable(false)
+        contentBinding.messageBody.measure(-1, -1)
+        contentBinding.messageBody.setTextIsSelectable(true)
     }
 
     /**
@@ -118,9 +101,9 @@ open class MessageViewHolder(private val parent: FullscreenContentFragment, iv: 
     fun setup(message: ForumMessage, topic: ForumTopic) {
         this.setup(message)
 
-        messageBody.customSelectionActionModeCallback = SelectionEnhancer(message, topic)
+        contentBinding.messageBody.customSelectionActionModeCallback = SelectionEnhancer(message, topic)
 
-        messageMenu.setOnClickListener { configureContextMenu(it, message, topic) }
+        contentBinding.messageOverflowMenu.setOnClickListener { configureContextMenu(it, message, topic) }
     }
 
     fun configureContextMenu(pmenu: PopupMenu, anchor: View, message: ForumMessage) {
@@ -137,8 +120,8 @@ open class MessageViewHolder(private val parent: FullscreenContentFragment, iv: 
                 MaterialAlertDialogBuilder(anchor.context)
                     .setTitle(R.string.confirm_action)
                     .setMessage(R.string.delete_message_question)
-                    .setNegativeButton(android.R.string.no, null)
-                    .setPositiveButton(android.R.string.yes) { _, _ -> deleteMessage(message.id) }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> deleteMessage(message.id) }
                     .show()
 
                 true
@@ -276,7 +259,7 @@ open class MessageViewHolder(private val parent: FullscreenContentFragment, iv: 
      */
     inner class SelectionEnhancer(private val message: ForumMessage, private val topic: ForumTopic): ActionMode.Callback {
 
-        private val textView = messageBody
+        private val textView = contentBinding.messageBody
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             val text = textView.text.subSequence(textView.selectionStart, textView.selectionEnd)

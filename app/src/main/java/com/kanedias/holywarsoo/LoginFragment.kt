@@ -5,13 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import butterknife.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.kanedias.holywarsoo.databinding.FragmentLoginBinding
 import com.kanedias.holywarsoo.model.MainPageModel
 import com.kanedias.holywarsoo.service.Network
 import kotlinx.coroutines.*
@@ -26,28 +25,21 @@ import kotlinx.coroutines.*
  */
 class LoginFragment : Fragment() {
 
-    @BindView(R.id.acc_username_input)
-    lateinit var usernameInput: EditText
-
-    @BindView(R.id.acc_password_input)
-    lateinit var passwordInput: EditText
-
     private lateinit var progressDialog: Dialog
-
     private lateinit var mainPageModel: MainPageModel
+    private lateinit var mainPageView: FragmentLoginBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val view = inflater.inflate(R.layout.fragment_login, container, false)
-        ButterKnife.bind(this, view)
-
+        mainPageView = FragmentLoginBinding.inflate(inflater, container, false)
         mainPageModel = ViewModelProvider(requireActivity()).get(MainPageModel::class.java)
 
+        mainPageView.confirmButton.setOnClickListener { doLogin() }
         progressDialog = MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.please_wait)
                 .setMessage(R.string.logging_in)
                 .create()
 
-        return view
+        return mainPageView.root
     }
 
     override fun onDestroyView() {
@@ -58,7 +50,6 @@ class LoginFragment : Fragment() {
     /**
      * Creates session for the user, saves auth and closes fragment on success.
      */
-    @OnClick(R.id.confirm_button)
     fun doLogin() {
         lifecycleScope.launch {
             progressDialog.show()
@@ -66,8 +57,8 @@ class LoginFragment : Fragment() {
             Network.perform(
                 networkAction = {
                     Network.login(
-                        username = usernameInput.text.toString(),
-                        password = passwordInput.text.toString())
+                        username = mainPageView.accUsernameInput.text.toString(),
+                        password = mainPageView.accPasswordInput.text.toString())
                 },
                 uiAction = {
                     Toast.makeText(requireContext(), R.string.login_successful, Toast.LENGTH_SHORT).show()

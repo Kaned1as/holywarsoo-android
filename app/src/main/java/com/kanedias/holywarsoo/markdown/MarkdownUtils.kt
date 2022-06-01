@@ -6,7 +6,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -16,21 +15,20 @@ import android.text.style.CharacterStyle
 import android.text.style.ClickableSpan
 import android.util.AttributeSet
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.kanedias.holywarsoo.BuildConfig
 import com.kanedias.holywarsoo.R
+import com.kanedias.holywarsoo.databinding.ViewImageOverlayBinding
 import com.kanedias.holywarsoo.misc.dpToPixel
 import com.kanedias.holywarsoo.service.Network
 import com.kanedias.holywarsoo.service.SpanCache
@@ -51,7 +49,6 @@ import io.noties.markwon.image.AsyncDrawableSpan
 import io.noties.markwon.image.glide.GlideImagesPlugin
 import io.noties.markwon.utils.NoCopySpannableFactory
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.util.*
 
@@ -160,7 +157,7 @@ fun postProcessDrawables(spanned: SpannableStringBuilder) {
                 val overlay = ImageShowOverlay(widget.context)
                 overlay.update(imgSpans[index])
 
-                StfalconImageViewer.Builder<AsyncDrawableSpan>(widget.context, imgSpans) { view, span ->
+                StfalconImageViewer.Builder(widget.context, imgSpans) { view, span ->
                     val resolved = Network.resolve(span.drawable.destination) ?: return@Builder
                     Glide.with(view).load(resolved.toString()).into(view)
                 }
@@ -333,22 +330,13 @@ class ImageShowOverlay(ctx: Context,
                        attrs: AttributeSet? = null,
                        defStyleAttr: Int = 0) : FrameLayout(ctx, attrs, defStyleAttr) {
 
-    @BindView(R.id.overlay_download)
-    lateinit var download: ImageView
-
-    @BindView(R.id.overlay_share)
-    lateinit var share: ImageView
-
-    init {
-        View.inflate(ctx, R.layout.view_image_overlay, this)
-        ButterKnife.bind(this)
-    }
+    private val binding = ViewImageOverlayBinding.inflate(LayoutInflater.from(ctx), this)
 
     fun update(span: AsyncDrawableSpan) {
         val resolved = Network.resolve(span.drawable.destination) ?: return
 
         // share button: share the image using file provider
-        share.setOnClickListener {
+        binding.overlayShare.setOnClickListener {
             Glide.with(it).asFile().load(resolved.toString()).into(object: SimpleTarget<File>() {
 
                 override fun onResourceReady(resource: File, transition: Transition<in File>?) {
@@ -366,7 +354,7 @@ class ImageShowOverlay(ctx: Context,
         }
 
         // download button: download the image to Download folder on internal SD
-        download.setOnClickListener {
+        binding.overlayDownload.setOnClickListener {
             val activity = context as? Activity ?: return@setOnClickListener
 
             // request SD write permissions if we don't have it already
@@ -425,7 +413,7 @@ class ImageShowOverlay(ctx: Context,
             }
 
             // cleanup old images
-            for (oldImg in sharedImgs.listFiles()) {
+            for (oldImg in sharedImgs.listFiles().orEmpty()) {
                 if (!oldImg.delete()) {
                     Log.w("Fair/Markdown", "Couldn't delete old image file! Path $oldImg")
                 }

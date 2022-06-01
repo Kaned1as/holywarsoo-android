@@ -7,18 +7,14 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.forEach
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.*
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.navigation.NavigationView
+import com.kanedias.holywarsoo.databinding.ActivityMainBinding
+import com.kanedias.holywarsoo.databinding.ViewSidebarHeaderBinding
 import com.kanedias.holywarsoo.markdown.mdRendererFrom
 import com.kanedias.holywarsoo.misc.showFullscreenFragment
 import com.kanedias.holywarsoo.model.MainPageModel
@@ -38,14 +34,7 @@ import java.lang.IllegalStateException
  */
 class MainActivity : ThemedActivity() {
 
-    @BindView(R.id.main_drawer_area)
-    lateinit var drawer: DrawerLayout
-
-    @BindView(R.id.main_sidebar)
-    lateinit var sidebar: NavigationView
-
-    @BindView(R.id.main_toolbar)
-    lateinit var toolbar: Toolbar
+    lateinit var binding: ActivityMainBinding
 
     lateinit var sidebarHeader: SidebarHeaderViewHolder
 
@@ -75,24 +64,24 @@ class MainActivity : ThemedActivity() {
         }
         Config.prefs.registerOnSharedPreferenceChangeListener(accountResetListener)
 
-        setContentView(R.layout.activity_main)
-        ButterKnife.bind(this)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // setup action bar
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.mainToolbar)
 
         // setup donate helper
         donateHelper = DonateHelper(this)
 
         // setup sidebar
-        sidebar.menu.forEach { it.isEnabled = false }
-        sidebar.setNavigationItemSelectedListener { item -> onSidebarItemSelected(item) }
-        sidebarHeader = SidebarHeaderViewHolder(sidebar.getHeaderView(0))
+        binding.mainSidebar.menu.forEach { it.isEnabled = false }
+        binding.mainSidebar.setNavigationItemSelectedListener { item -> onSidebarItemSelected(item) }
+        sidebarHeader = SidebarHeaderViewHolder(binding.mainSidebar.getHeaderView(0))
 
         // setup drawer and menu button
-        val drawerToggle = ActionBarDrawerToggle(this, drawer, toolbar, R.string.open, R.string.close)
-        drawer.addDrawerListener(drawerToggle)
-        drawer.addDrawerListener(object: DrawerLayout.SimpleDrawerListener() {
+        val drawerToggle = ActionBarDrawerToggle(this, binding.mainDrawerArea, binding.mainToolbar, R.string.open, R.string.close)
+        binding.mainDrawerArea.addDrawerListener(drawerToggle)
+        binding.mainDrawerArea.addDrawerListener(object: DrawerLayout.SimpleDrawerListener() {
             override fun onDrawerClosed(drawerView: View) {
                 val resources = listOf(
                     R.drawable.guy_fawkes_mask,
@@ -106,22 +95,22 @@ class MainActivity : ThemedActivity() {
         })
         drawerToggle.syncState()
 
-        mainPageModel = ViewModelProviders.of(this).get(MainPageModel::class.java)
+        mainPageModel = ViewModelProvider(this).get(MainPageModel::class.java)
         mainPageModel.account.observe(this, Observer {
             if (it.isNullOrEmpty()) {
-                sidebar.menu.forEach { item -> item.isEnabled = false }
+                binding.mainSidebar.menu.forEach { item -> item.isEnabled = false }
                 sidebarHeader.username.setText(R.string.guest)
                 sidebarHeader.loginButton.setImageResource(R.drawable.login)
                 sidebarHeader.loginButton.setOnClickListener {
-                    drawer.closeDrawers()
+                    binding.mainDrawerArea.closeDrawers()
                     showFullscreenFragment(LoginFragment())
                 }
             } else {
-                sidebar.menu.forEach { item -> item.isEnabled = true }
+                binding.mainSidebar.menu.forEach { item -> item.isEnabled = true }
                 sidebarHeader.username.text = it
                 sidebarHeader.loginButton.setImageResource(R.drawable.exit)
                 sidebarHeader.loginButton.setOnClickListener {
-                    drawer.closeDrawers()
+                    binding.mainDrawerArea.closeDrawers()
                     Network.logout()
                     refreshContent()
                 }
@@ -278,7 +267,7 @@ class MainActivity : ThemedActivity() {
             R.id.menu_item_my_subscriptions -> Network.SUBSCRIBED_TOPICS_URL
             else -> throw IllegalStateException("No such page!")
         }
-        drawer.closeDrawers()
+        binding.mainDrawerArea.closeDrawers()
 
         val frag = SearchTopicsContentFragment().apply {
             arguments = Bundle().apply { putString(SearchTopicsContentFragment.URL_ARG, url) }
@@ -415,18 +404,10 @@ class MainActivity : ThemedActivity() {
     }
 
     class SidebarHeaderViewHolder(iv: View) {
-        @BindView(R.id.sidebar_header_random_image)
-        lateinit var randomImage: ImageView
-
-        @BindView(R.id.sidebar_header_current_user_name)
-        lateinit var username: TextView
-
-        @BindView(R.id.sidebar_header_login)
-        lateinit var loginButton: ImageView
-
-        init {
-            ButterKnife.bind(this, iv)
-        }
+        private val binding = ViewSidebarHeaderBinding.bind(iv)
+        val randomImage = binding.sidebarHeaderRandomImage
+        val username = binding.sidebarHeaderCurrentUserName
+        val loginButton = binding.sidebarHeaderLogin
     }
 
 }

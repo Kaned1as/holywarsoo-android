@@ -8,7 +8,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.ButterKnife
+import androidx.viewbinding.ViewBinding
+import com.kanedias.holywarsoo.databinding.FragmentContentsBinding
 import com.kanedias.holywarsoo.dto.Forum
 import com.kanedias.holywarsoo.model.ForumContentsModel
 import com.kanedias.holywarsoo.service.Network
@@ -30,9 +31,12 @@ class ForumContentFragment: FullscreenContentFragment() {
 
     lateinit var contents: ForumContentsModel
 
+    override fun bindLayout(inflater: LayoutInflater, container: ViewGroup?): ViewBinding {
+        return FragmentContentsBinding.inflate(inflater, container, false)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, parent: ViewGroup?, state: Bundle?): View {
-        val view = inflater.inflate(R.layout.fragment_contents, parent, false)
-        ButterKnife.bind(this, view)
+        val view = super.onCreateView(inflater, parent, state)
 
         contents = ViewModelProvider(this).get(ForumContentsModel::class.java)
         contents.forum.observe(viewLifecycleOwner) { contentView.adapter = ForumContentsAdapter(it) }
@@ -155,9 +159,9 @@ class ForumContentFragment: FullscreenContentFragment() {
                         // show category if it's changed
                         val categoryChanged = position > 0 && forum.category != subforums[position - 1].category
                         if (forum.category != null && (position == 0 || categoryChanged)) {
-                            holder.forumCategoryArea.visibility = View.VISIBLE
+                            holder.binding.forumListItemSeparator.visibility = View.VISIBLE
                         } else {
-                            holder.forumCategoryArea.visibility = View.GONE
+                            holder.binding.forumListItemSeparator.visibility = View.GONE
                         }
                     }
                 }

@@ -3,13 +3,10 @@ package com.kanedias.holywarsoo
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindView
-import butterknife.ButterKnife
-import com.google.android.material.textview.MaterialTextView
+import com.kanedias.holywarsoo.databinding.FragmentTopicListItemBinding
 import com.kanedias.holywarsoo.dto.ForumTopicDesc
 import com.kanedias.holywarsoo.misc.layoutVisibilityBool
 import com.kanedias.holywarsoo.misc.resolveAttr
@@ -27,72 +24,46 @@ import com.kanedias.holywarsoo.misc.showFullscreenFragment
  */
 class TopicViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
 
-    @BindView(R.id.topic_name)
-    lateinit var topicName: MaterialTextView
-
-    @BindView(R.id.topic_replies_label)
-    lateinit var topicRepliesLabel: MaterialTextView
-
-    @BindView(R.id.topic_replies_count)
-    lateinit var topicReplies: MaterialTextView
-
-    @BindView(R.id.topic_views_label)
-    lateinit var topicViewsLabel: MaterialTextView
-
-    @BindView(R.id.topic_view_count)
-    lateinit var topicViews: MaterialTextView
-
-    @BindView(R.id.topic_last_message_topic)
-    lateinit var lastMessage: MaterialTextView
-
-    @BindView(R.id.topic_sticky_marker)
-    lateinit var stickyMarker: ImageView
-
-    @BindView(R.id.topic_closed_marker)
-    lateinit var closedMarker: ImageView
-
-    init {
-        ButterKnife.bind(this, iv)
-    }
+    val binding = FragmentTopicListItemBinding.bind(iv)
 
     fun setup(topic: ForumTopicDesc) {
-        stickyMarker.layoutVisibilityBool = topic.sticky
-        closedMarker.layoutVisibilityBool = topic.closed
-        topicName.text = topic.name
+        binding.topicStickyMarker.layoutVisibilityBool = topic.sticky
+        binding.topicClosedMarker.layoutVisibilityBool = topic.closed
+        binding.topicName.text = topic.name
 
         if (topic.replyCount != null) {
-            topicReplies.visibility = View.VISIBLE
-            topicRepliesLabel.visibility = View.VISIBLE
-            topicReplies.text = topic.replyCount.toString()
+            binding.topicRepliesLabel.visibility = View.VISIBLE
+            binding.topicRepliesCount.visibility = View.VISIBLE
+            binding.topicRepliesCount.text = topic.replyCount.toString()
         } else {
-            topicRepliesLabel.visibility = View.GONE
-            topicReplies.visibility = View.GONE
+            binding.topicRepliesLabel.visibility = View.GONE
+            binding.topicRepliesCount.visibility = View.GONE
         }
 
         if (topic.viewCount != null) {
-            topicViewsLabel.visibility = View.VISIBLE
-            topicViews.visibility = View.VISIBLE
-            topicViews.text = topic.viewCount.toString()
+            binding.topicViewsLabel.visibility = View.VISIBLE
+            binding.topicViewCount.visibility = View.VISIBLE
+            binding.topicViewCount.text = topic.viewCount.toString()
         } else {
-            topicViewsLabel.visibility = View.GONE
-            topicViews.visibility = View.GONE
+            binding.topicViewsLabel.visibility = View.GONE
+            binding.topicViewCount.visibility = View.GONE
         }
 
         if (topic.lastMessageDate.isNullOrEmpty()) {
-            lastMessage.visibility = View.GONE
+            binding.topicLastMessageTopic.visibility = View.GONE
         } else {
-            lastMessage.visibility = View.VISIBLE
-            lastMessage.text = topic.lastMessageDate
+            binding.topicLastMessageTopic.visibility = View.VISIBLE
+            binding.topicLastMessageTopic.text = topic.lastMessageDate
         }
 
         if (topic.newMessageUrl != null) {
             val color = itemView.resolveAttr(R.attr.colorPrimary)
-            lastMessage.setTextColor(color)
-            TextViewCompat.setCompoundDrawableTintList(lastMessage, ColorStateList.valueOf(color))
+            binding.topicLastMessageTopic.setTextColor(color)
+            TextViewCompat.setCompoundDrawableTintList(binding.topicLastMessageTopic, ColorStateList.valueOf(color))
         } else {
             val color = itemView.resolveAttr(R.attr.colorNonImportantText)
-            lastMessage.setTextColor(color)
-            TextViewCompat.setCompoundDrawableTintList(lastMessage, ColorStateList.valueOf(color))
+            binding.topicLastMessageTopic.setTextColor(color)
+            TextViewCompat.setCompoundDrawableTintList(binding.topicLastMessageTopic, ColorStateList.valueOf(color))
         }
 
         itemView.setOnClickListener {
@@ -107,7 +78,7 @@ class TopicViewHolder(iv: View) : RecyclerView.ViewHolder(iv) {
             (itemView.context as AppCompatActivity).showFullscreenFragment(fragment)
         }
 
-        lastMessage.setOnClickListener {
+        binding.topicLastMessageTopic.setOnClickListener {
             val fragment = TopicContentFragment().apply {
                 arguments = Bundle().apply {
                     putString(TopicContentFragment.URL_ARG, topic.lastMessageUrl)

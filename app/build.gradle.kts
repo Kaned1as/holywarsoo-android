@@ -162,7 +162,6 @@ dependencies {
     implementation("com.google.android.material:material:1.7.0-alpha02")         // Material design support lib
     implementation("androidx.room:room-runtime:${extra["roomVersion"]}")         // SQLite ORM lib
 
-    implementation("com.jakewharton:butterknife:10.2.0")                         // Annotation processor
     implementation("com.squareup.okhttp3:okhttp:4.9.3")                         // android http client
     implementation("com.github.franmontiel:PersistentCookieJar:v1.0.1")          // cookie support
     implementation("com.github.stfalcon:stfalcon-imageviewer:0.1.0")             // embedded image viewer
@@ -186,7 +185,6 @@ dependencies {
     implementation("androidx.room:room-ktx:${extra["roomVersion"]}")             // coroutines/transactions in orm
 
     // annotation processors
-    kapt("com.jakewharton:butterknife-compiler:10.2.0")                          // view bindings
     kapt("androidx.room:room-compiler:${extra["roomVersion"]}")                  // database schema
 
     testImplementation("junit:junit:4.12")

@@ -8,7 +8,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.ButterKnife
+import androidx.viewbinding.ViewBinding
+import com.kanedias.holywarsoo.databinding.FragmentContentsBinding
 import com.kanedias.holywarsoo.dto.ForumTopicDesc
 import com.kanedias.holywarsoo.dto.SearchResults
 import com.kanedias.holywarsoo.model.SearchTopicsContentsModel
@@ -31,9 +32,12 @@ class SearchTopicsContentFragment: FullscreenContentFragment() {
 
     lateinit var contents: SearchTopicsContentsModel
 
-    override fun onCreateView(inflater: LayoutInflater, parent: ViewGroup?, state: Bundle?): View {
-        val view = inflater.inflate(R.layout.fragment_contents, parent, false)
-        ButterKnife.bind(this, view)
+    override fun bindLayout(inflater: LayoutInflater, container: ViewGroup?): ViewBinding {
+        return FragmentContentsBinding.inflate(inflater, container, false)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val view = super.onCreateView(inflater, container, savedInstanceState)
 
         contents = ViewModelProvider(this).get(SearchTopicsContentsModel::class.java)
         contents.search.observe(viewLifecycleOwner) { contentView.adapter = SearchPageContentsAdapter(it) }

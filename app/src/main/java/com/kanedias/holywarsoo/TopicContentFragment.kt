@@ -7,8 +7,9 @@ import android.view.*
 import android.widget.Toast
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.ButterKnife
+import androidx.viewbinding.ViewBinding
 import com.google.android.material.card.MaterialCardView
+import com.kanedias.holywarsoo.databinding.FragmentContentsBinding
 import com.kanedias.holywarsoo.dto.ForumMessage
 import com.kanedias.holywarsoo.misc.resolveAttr
 import com.kanedias.holywarsoo.misc.shareLink
@@ -36,9 +37,12 @@ class TopicContentFragment: FullscreenContentFragment() {
 
     lateinit var contents: TopicContentsModel
 
-    override fun onCreateView(inflater: LayoutInflater, parent: ViewGroup?, state: Bundle?): View {
-        val view = inflater.inflate(R.layout.fragment_contents, parent, false)
-        ButterKnife.bind(this, view)
+    override fun bindLayout(inflater: LayoutInflater, container: ViewGroup?): ViewBinding {
+        return FragmentContentsBinding.inflate(inflater, container, false)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val view = super.onCreateView(inflater, container, savedInstanceState)
 
         contents = ViewModelProvider(this).get(TopicContentsModel::class.java)
         contents.topic.observe(viewLifecycleOwner, Observer { contentView.adapter!!.notifyDataSetChanged() })
@@ -166,7 +170,7 @@ class TopicContentFragment: FullscreenContentFragment() {
                 val frag = AddMessageFragment().apply {
                     arguments = Bundle().apply { putSerializable(AddMessageFragment.TOPIC_ID_ARG, topic.id) }
                 }
-                frag.show(fragmentManager!!, "reply fragment")
+                frag.show(parentFragmentManager, "reply fragment")
             }
         } else {
             actionButton.visibility = View.GONE
@@ -272,7 +276,10 @@ class TopicContentFragment: FullscreenContentFragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val view = inflater.inflate(R.layout.fragment_topic_message_list_item, parent, false)
-            return MessageViewHolder(this@TopicContentFragment, view)
+            val holder = MessageViewHolder(this@TopicContentFragment, view)
+            holder.initBinding()
+
+            return holder
         }
 
         override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {

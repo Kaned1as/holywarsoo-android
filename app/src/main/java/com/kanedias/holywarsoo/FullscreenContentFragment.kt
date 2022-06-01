@@ -1,12 +1,15 @@
 package com.kanedias.holywarsoo
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import butterknife.BindView
+import androidx.viewbinding.ViewBinding
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.kanedias.holywarsoo.misc.resolveAttr
 import com.kanedias.holywarsoo.model.PageableModel
@@ -22,25 +25,31 @@ import com.r0adkll.slidr.model.SlidrPosition
  */
 abstract class FullscreenContentFragment: ContentFragment() {
 
-    @BindView(R.id.main_fragment_content_area)
     lateinit var mainArea: CoordinatorLayout
-
-    @BindView(R.id.content_toolbar)
     lateinit var toolbar: Toolbar
-
-    @BindView(R.id.content_scroll_area)
     lateinit var viewRefresher: SwipeRefreshLayout
-
-    @BindView(R.id.content_bottom_navigation)
     lateinit var pageNavigation: ViewGroup
-
-    @BindView(R.id.content_list)
     lateinit var contentView: RecyclerView
-
-    @BindView(R.id.content_reply_button)
     lateinit var actionButton: FloatingActionButton
 
+    private lateinit var binding: ViewBinding
     private lateinit var pageControls: PageViews
+
+    abstract fun bindLayout(inflater: LayoutInflater, container: ViewGroup?): ViewBinding
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        super.onCreateView(inflater, container, savedInstanceState)
+        binding = bindLayout(inflater, container)
+
+        mainArea = binding.root.findViewById(R.id.main_fragment_content_area)
+        toolbar = binding.root.findViewById(R.id.content_toolbar)
+        viewRefresher = binding.root.findViewById(R.id.content_scroll_area)
+        pageNavigation = binding.root.findViewById(R.id.content_bottom_navigation)
+        contentView = binding.root.findViewById(R.id.content_list)
+        actionButton = binding.root.findViewById(R.id.content_reply_button)
+
+        return binding.root
+    }
 
     open fun setupUI(model: PageableModel) {
         viewRefresher.setColorSchemeColors(requireContext().resolveAttr(R.attr.colorSecondary))
@@ -52,7 +61,7 @@ abstract class FullscreenContentFragment: ContentFragment() {
     override fun refreshViews() {
         // setup toolbar
         toolbar.navigationIcon = DrawerArrowDrawable(activity).apply { progress = 1.0f }
-        toolbar.setNavigationOnClickListener { fragmentManager?.popBackStack() }
+        toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
     }
 
     /**

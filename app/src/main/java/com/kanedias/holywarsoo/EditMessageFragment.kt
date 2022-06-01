@@ -4,17 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.LinearLayout
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputLayout
 import com.kanedias.holywarsoo.database.entities.OfflineDraft
+import com.kanedias.holywarsoo.databinding.FragmentAddMessageBinding
 import com.kanedias.holywarsoo.misc.layoutVisibilityBool
 import com.kanedias.holywarsoo.service.Database
 import com.kanedias.holywarsoo.service.Network
@@ -40,26 +35,20 @@ class EditMessageFragment: EditorFragment() {
         const val EDIT_MESSAGE_ID_ARG = "EDIT_MESSAGE_ID_ARG"
     }
 
-    @BindView(R.id.source_subject_helper)
-    lateinit var subjectHelperLayout: TextInputLayout
+    private lateinit var binding: FragmentAddMessageBinding
 
-    @BindView(R.id.source_subject)
-    lateinit var subjectInput: EditText
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        binding = FragmentAddMessageBinding.inflate(inflater, container, false)
+        binding.messageCancel.setOnClickListener { dialog?.cancel() }
+        binding.messageSubmit.setOnClickListener { submit() }
 
-    @BindView(R.id.main_post_area)
-    lateinit var editorArea: LinearLayout
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_add_message, container, false)
-        ButterKnife.bind(this, view)
-
-        editor = EditorViews(this, editorArea)
+        editor = EditorViews(this, binding)
         lifecycleScope.launch {
             handleEdit()
             handleDraft()
         }
 
-        return view
+        return binding.root
     }
 
     private suspend fun handleEdit() {
@@ -78,10 +67,10 @@ class EditMessageFragment: EditorFragment() {
             networkAction = { Network.loadEditPost(editId) },
             uiAction = { message ->
                 if (!message.subject.isNullOrEmpty()) {
-                    subjectHelperLayout.layoutVisibilityBool = true
-                    subjectInput.setText(message.subject)
+                    binding.sourceSubjectHelper.layoutVisibilityBool = true
+                    binding.sourceSubject.setText(message.subject)
                 }
-                editor.contentInput.setText(message.content)
+                binding.sourceText.setText(message.content)
             },
             exceptionAction = {
                 Network.reportErrors(context, it)
@@ -98,27 +87,21 @@ class EditMessageFragment: EditorFragment() {
 
         // if draft exists with this key, fill content with it
         Database.draftDao().getByKey(contextKey)?.let {
-            editor.contentInput.setText(it.content)
-            editor.contentInput.setSelection(editor.contentInput.length())
+            binding.sourceText.setText(it.content)
+            binding.sourceText.setSelection(binding.sourceText.length())
         }
 
         // delay saving text a bit so database won't be spammed with it
-        editor.contentInput.addTextChangedListener { text ->
+        binding.sourceText.addTextChangedListener { text ->
             val action = {
                 val draft = OfflineDraft(createdAt = Date(), ctxKey = contextKey, content = text.toString())
                 Database.draftDao().insertDraft(draft)
             }
-            editor.contentInput.removeCallbacks(action)
-            editor.contentInput.postDelayed(action, 1500)
+            binding.sourceText.removeCallbacks(action)
+            binding.sourceText.postDelayed(action, 1500)
         }
     }
 
-    @OnClick(R.id.message_cancel)
-    fun cancel() {
-        dialog?.cancel()
-    }
-
-    @OnClick(R.id.message_submit)
     fun submit() {
         val messageId = requireArguments().getInt(EDIT_MESSAGE_ID_ARG)
         val contextKey = "${DB_CONTEXT_PREFIX}-${messageId}"
@@ -129,10 +112,10 @@ class EditMessageFragment: EditorFragment() {
             .create()
 
         val frgPredicate = { it: Fragment -> it is ContentFragment }
-        val curFrg = requireFragmentManager().fragments.reversed().find(frgPredicate) as TopicContentFragment?
+        val curFrg = parentFragmentManager.fragments.reversed().find(frgPredicate) as TopicContentFragment?
         val edited = Network.EditMessageDesc(
-            subject = subjectInput.text.toString(),
-            content = editor.contentInput.text.toString()
+            subject = binding.sourceSubject.text.toString(),
+            content = binding.sourceText.text.toString()
         )
 
         lifecycleScope.launch {
@@ -147,7 +130,7 @@ class EditMessageFragment: EditorFragment() {
 
                     // delete draft of this message, prevent reinsertion
                     // should be race-free since it's in the same thread as this one (Main UI thread)
-                    editor.contentInput.handler?.removeCallbacksAndMessages(contextKey)
+                    binding.sourceText.handler?.removeCallbacksAndMessages(contextKey)
                     Database.draftDao().deleteByKey(contextKey)
 
                     // refresh parent fragment

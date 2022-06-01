@@ -8,7 +8,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.ButterKnife
+import androidx.viewbinding.ViewBinding
+import com.kanedias.holywarsoo.databinding.FragmentContentsBinding
 import com.kanedias.holywarsoo.dto.ForumMessage
 import com.kanedias.holywarsoo.dto.SearchResults
 import com.kanedias.holywarsoo.model.SearchMessagesContentsModel
@@ -30,11 +31,14 @@ class SearchMessagesContentFragment: FullscreenContentFragment() {
         const val KEYWORD_ARG = "KEYWORD_ARG"
     }
 
-    lateinit var contents: SearchMessagesContentsModel
+    private lateinit var contents: SearchMessagesContentsModel
+
+    override fun bindLayout(inflater: LayoutInflater, container: ViewGroup?): ViewBinding {
+        return FragmentContentsBinding.inflate(inflater, container, false)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, parent: ViewGroup?, state: Bundle?): View {
-        val view = inflater.inflate(R.layout.fragment_contents, parent, false)
-        ButterKnife.bind(this, view)
+        val view = super.onCreateView(inflater, parent, state)
 
         contents = ViewModelProvider(this).get(SearchMessagesContentsModel::class.java)
         contents.search.observe(viewLifecycleOwner) { contentView.adapter = SearchPageContentsAdapter(it) }
@@ -93,7 +97,10 @@ class SearchMessagesContentFragment: FullscreenContentFragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchMessageViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val view = inflater.inflate(R.layout.fragment_search_message_list_item, parent, false)
-            return SearchMessageViewHolder(this@SearchMessagesContentFragment, view)
+            val holder = SearchMessageViewHolder(this@SearchMessagesContentFragment, view)
+            holder.initBinding()
+
+            return holder
         }
 
         override fun onBindViewHolder(holder: SearchMessageViewHolder, position: Int) {

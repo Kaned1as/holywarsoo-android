@@ -14,13 +14,12 @@ import androidx.core.content.ContextCompat
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.OnClick
 import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.kanedias.holywarsoo.databinding.FragmentAddMessageBinding
 import com.kanedias.holywarsoo.service.Network
 import com.kanedias.holywarsoo.service.SmiliesCache
 import kotlinx.coroutines.*
@@ -33,58 +32,42 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
  *
  * Created on 07.04.18
  */
-class EditorViews(private val parent: Fragment, private val iv: View) {
+class EditorViews(private val parent: Fragment, val binding: FragmentAddMessageBinding) {
 
     companion object {
         const val ACTIVITY_REQUEST_IMAGE_UPLOAD = 0
         const val PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD = 0
     }
 
-    @BindView(R.id.source_text)
-    lateinit var contentInput: EditText
-
-    @BindView(R.id.edit_insert_from_clipboard)
-    lateinit var clipboardSwitch: CheckBox
-
-    @BindView(R.id.edit_quick_image)
-    lateinit var imageUpload: ImageView
-
-    @BindView(R.id.edit_quick_smilies)
-    lateinit var addSmilie: ImageView
-
-    @BindView(R.id.edit_quick_button_area)
-    lateinit var buttonArea: GridLayout
-
     init {
-        ButterKnife.bind(this, iv)
+        binding.editQuickButtonArea.children.forEach { quickBtn ->
+            quickBtn.setOnClickListener { editSelection(it) }
+        }
+        binding.editQuickSmilies.setOnClickListener { insertSmilie(it) }
+        binding.editQuickImage.setOnClickListener { uploadImage(it) }
 
         if (parent is AddMessageFragment) {
             // start editing content right away
-            contentInput.requestFocus()
+            binding.sourceText.requestFocus()
         }
     }
 
     /**
      * Handler of all small editing buttons above content input.
      */
-    @OnClick(
-            R.id.edit_quick_bold, R.id.edit_quick_italic, R.id.edit_quick_underlined, R.id.edit_quick_strikethrough,
-            R.id.edit_quick_code, R.id.edit_quick_quote, R.id.edit_quick_number_list, R.id.edit_quick_bullet_list,
-            R.id.edit_quick_link, R.id.edit_quick_more
-    )
     fun editSelection(clicked: View) {
-        val clipboard = iv.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        var paste = if (clipboardSwitch.isChecked && clipboard.hasPrimaryClip() && clipboard.primaryClip!!.itemCount > 0) {
+        val clipboard = binding.root.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        var paste = if (binding.editInsertFromClipboard.isChecked && clipboard.hasPrimaryClip() && clipboard.primaryClip!!.itemCount > 0) {
             clipboard.primaryClip!!.getItemAt(0).text.toString()
         } else {
             ""
         }
 
         // check whether we have text selected in content input
-        if (paste.isEmpty() && contentInput.hasSelection()) {
+        if (paste.isEmpty() && binding.sourceText.hasSelection()) {
             // delete selection
-            paste = contentInput.text.substring(contentInput.selectionStart until contentInput.selectionEnd)
-            contentInput.text.delete(contentInput.selectionStart, contentInput.selectionEnd)
+            paste = binding.sourceText.text!!.substring(binding.sourceText.selectionStart until binding.sourceText.selectionEnd)
+            binding.sourceText.text!!.delete(binding.sourceText.selectionStart, binding.sourceText.selectionEnd)
         }
 
         when (clicked.id) {
@@ -101,10 +84,9 @@ class EditorViews(private val parent: Fragment, private val iv: View) {
             R.id.edit_quick_more -> insertInCursorPosition("[spoiler]", paste, "[/spoiler]")
         }
 
-        clipboardSwitch.isChecked = false
+        binding.editInsertFromClipboard.isChecked = false
     }
 
-    @OnClick(R.id.edit_quick_smilies)
     fun insertSmilie(clicked: View) {
         val smilieTypes = SmiliesCache.getAllSmilies()
 
@@ -135,15 +117,14 @@ class EditorViews(private val parent: Fragment, private val iv: View) {
     /**
      * Image upload button requires special handling
      */
-    @OnClick(R.id.edit_quick_image)
     fun uploadImage(clicked: View) {
         // sometimes we need SD-card access to load the image
-        if (ContextCompat.checkSelfPermission(iv.context, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(binding.root.context, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
             parent.requestPermissions(arrayOf(WRITE_EXTERNAL_STORAGE), PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD)
             return
         }
 
-        if (clipboardSwitch.isChecked) {
+        if (binding.editInsertFromClipboard.isChecked) {
             // delegate to just paste image link from clipboard
             editSelection(clicked)
             return
@@ -155,10 +136,10 @@ class EditorViews(private val parent: Fragment, private val iv: View) {
                 type = "image/*"
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
-            val chooser = Intent.createChooser(intent, iv.context.getString(R.string.select_image_to_upload))
+            val chooser = Intent.createChooser(intent, binding.root.context.getString(R.string.select_image_to_upload))
             parent.startActivityForResult(chooser, ACTIVITY_REQUEST_IMAGE_UPLOAD)
         } catch (ex: ActivityNotFoundException) {
-            Toast.makeText(iv.context, iv.context.getString(R.string.no_file_manager_found), Toast.LENGTH_SHORT).show()
+            Toast.makeText(binding.root.context, binding.root.context.getString(R.string.no_file_manager_found), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -166,9 +147,9 @@ class EditorViews(private val parent: Fragment, private val iv: View) {
         if (intent?.data == null)
             return
 
-        val stream = iv.context?.contentResolver?.openInputStream(intent.data as Uri) ?: return
+        val stream = binding.root.context?.contentResolver?.openInputStream(intent.data as Uri) ?: return
 
-        val dialog = MaterialAlertDialogBuilder(iv.context)
+        val dialog = MaterialAlertDialogBuilder(binding.root.context)
                 .setTitle(R.string.please_wait)
                 .setMessage(R.string.uploading)
                 .create()
@@ -198,10 +179,10 @@ class EditorViews(private val parent: Fragment, private val iv: View) {
         val fileName = fileNameFull.substring(0, fileNameFull.lastIndexOf('.')) // 12345
         val fileExt = fileNameFull.substring(fileNameFull.lastIndexOf('.') + 1) // png
 
-        MaterialAlertDialogBuilder(iv.context)
+        MaterialAlertDialogBuilder(binding.root.context)
             .setTitle(R.string.select_image_size)
             .setItems(R.array.image_sizes) { _, idx ->
-                val marker = iv.context.resources.getStringArray(R.array.image_sizes_values)[idx]
+                val marker = binding.root.context.resources.getStringArray(R.array.image_sizes_values)[idx]
                 val updatedLink = imgUrl.newBuilder() // replace with e.g. https://i.imgur.com/12345h.png
                     .setPathSegment(fileNamePos, "${fileName}${marker}.${fileExt}")
                     .toString()
@@ -221,18 +202,18 @@ class EditorViews(private val parent: Fragment, private val iv: View) {
      *          not empty.
      */
     private fun insertInCursorPosition(prefix: String, what: String, suffix: String = "") {
-        var cursorPos = contentInput.selectionStart
+        var cursorPos = binding.sourceText.selectionStart
         if (cursorPos == -1)
-            cursorPos = contentInput.text.length
+            cursorPos = binding.sourceText.text!!.length
 
-        val beforeCursor = contentInput.text.substring(0, cursorPos)
-        val afterCursor = contentInput.text.substring(cursorPos, contentInput.text.length)
+        val beforeCursor = binding.sourceText.text!!.substring(0, cursorPos)
+        val afterCursor = binding.sourceText.text!!.substring(cursorPos, binding.sourceText.text!!.length)
 
         val beforeCursorWithPrefix = beforeCursor + prefix
         val suffixWithAfterCursor = suffix + afterCursor
         val result = beforeCursorWithPrefix + what + suffixWithAfterCursor
-        contentInput.setText(result)
+        binding.sourceText.setText(result)
 
-        contentInput.setSelection(cursorPos + prefix.length, cursorPos + prefix.length + what.length)
+        binding.sourceText.setSelection(cursorPos + prefix.length, cursorPos + prefix.length + what.length)
     }
 }
