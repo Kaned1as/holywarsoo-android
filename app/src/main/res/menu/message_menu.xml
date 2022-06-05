@@ -7,6 +7,11 @@
         android:icon="@drawable/share"/>
 
     <item
+        android:id="@+id/menu_message_copy_link"
+        android:title="@string/copy_link"
+        android:icon="@drawable/link_plus"/>
+
+    <item
         android:id="@+id/menu_message_quote"
         android:title="@string/quote"
         android:icon="@drawable/reply"/>

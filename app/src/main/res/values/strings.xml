@@ -122,6 +122,8 @@
     <string tools:context="message overflow menu" name="report">Report</string>
     <string tools:context="message overflow menu" name="describe_why_reporting">Describe reason for reporting</string>
     <string tools:context="message overflow menu" name="reported">Reported</string>
+    <string tools:context="message overflow menu" name="copy_link">Copy link</string>
+    <string tools:context="message overflow menu" name="copied_arg">Copied: %s</string>
 
     <string tools:context="delete message dialog" name="confirm_action">Confirm action</string>
     <string tools:context="delete message dialog" name="delete_message_question">Delete this message?</string>

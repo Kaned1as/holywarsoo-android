@@ -1,10 +1,14 @@
 package com.kanedias.holywarsoo
 
 import android.animation.ValueAnimator
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import androidx.core.view.children
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
@@ -13,6 +17,7 @@ import com.kanedias.holywarsoo.databinding.FragmentContentsBinding
 import com.kanedias.holywarsoo.dto.ForumMessage
 import com.kanedias.holywarsoo.misc.resolveAttr
 import com.kanedias.holywarsoo.misc.shareLink
+import com.kanedias.holywarsoo.misc.showToast
 import com.kanedias.holywarsoo.model.PageableModel
 import com.kanedias.holywarsoo.model.TopicContentsModel
 import com.kanedias.holywarsoo.service.Network
@@ -162,6 +167,15 @@ class TopicContentFragment: FullscreenContentFragment() {
             val shareMi = menu.findItem(R.id.menu_topic_share)
             shareMi.isVisible = true
             shareMi.setOnMenuItemClickListener { context.shareLink(topic.link); true }
+
+            val copyMi = menu.findItem(R.id.menu_topic_copy_link)
+            copyMi.isVisible = true
+            copyMi.setOnMenuItemClickListener {
+                val clipboardMgr = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                clipboardMgr.setPrimaryClip(ClipData.newPlainText(topic.link, topic.link))
+                toolbar.children.lastOrNull()?.showToast(context.getString(R.string.copied_arg, topic.link))
+                true
+            }
         }
 
         if (topic.isWritable) {

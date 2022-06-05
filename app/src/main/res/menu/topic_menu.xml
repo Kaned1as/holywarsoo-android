@@ -18,6 +18,13 @@
         app:showAsAction="never"/>
 
     <item
+        android:id="@+id/menu_topic_copy_link"
+        android:title="@string/copy_link"
+        android:icon="@drawable/link_plus"
+        android:visible="false"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/menu_topic_subscribe"
         android:title="@string/subscribe"
         android:icon="@drawable/subscription_add"

@@ -1,5 +1,8 @@
 package com.kanedias.holywarsoo
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.*
@@ -7,8 +10,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.iterator
@@ -149,6 +150,12 @@ open class MessageViewHolder(private val parent: FullscreenContentFragment, iv: 
             editMenuItem.isVisible = false
         }
 
+        pmenu.menu.findItem(R.id.menu_message_copy_link).setOnMenuItemClickListener {
+            val clipboardMgr = anchor.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            clipboardMgr.setPrimaryClip(ClipData.newPlainText(message.link, message.link))
+            anchor.showToast(anchor.context.getString(R.string.copied_arg, message.link))
+            true
+        }
 
         // report message to the administration
         pmenu.menu.findItem(R.id.menu_message_report).setOnMenuItemClickListener {
@@ -208,9 +215,8 @@ open class MessageViewHolder(private val parent: FullscreenContentFragment, iv: 
             true
         }
 
-        val helper = MenuPopupHelper(anchor.context, pmenu.menu as MenuBuilder, anchor)
-        helper.setForceShowIcon(true)
-        helper.show()
+        pmenu.setForceShowIcon(true)
+        pmenu.show()
     }
 
     private fun deleteMessage(messageId: Int) {

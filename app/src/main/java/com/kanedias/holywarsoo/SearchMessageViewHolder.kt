@@ -3,15 +3,11 @@ package com.kanedias.holywarsoo
 import android.content.Intent
 import android.net.Uri
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.view.menu.MenuPopupHelper
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.iterator
 import com.kanedias.holywarsoo.databinding.FragmentSearchMessageListItemBinding
-import com.kanedias.holywarsoo.databinding.FragmentTopicMessageListItemBinding
 import com.kanedias.holywarsoo.databinding.ViewMessageContentBinding
 import com.kanedias.holywarsoo.dto.ForumMessage
 import com.kanedias.holywarsoo.dto.NavigationScope
@@ -79,8 +75,7 @@ class SearchMessageViewHolder(parent: SearchMessagesContentFragment, iv: View): 
 
         configureContextMenu(pmenu, anchor, message)
 
-        val helper = MenuPopupHelper(anchor.context, pmenu.menu as MenuBuilder, anchor)
-        helper.setForceShowIcon(true)
-        helper.show()
+        pmenu.setForceShowIcon(true)
+        pmenu.show()
     }
 }
