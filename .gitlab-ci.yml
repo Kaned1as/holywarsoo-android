@@ -4,7 +4,6 @@ image: openjdk:11-jdk
 variables:
   ANDROID_COMPILE_SDK: "31"
   ANDROID_TEST_SDK: "24"
-  ANDROID_BUILD_TOOLS: "31.0.0"
   ANDROID_SDK_TOOLS: "8092744"
   ANDROID_COMPILE_NDK: "22.1.7171670"
   GIT_STRATEGY: fetch
@@ -22,10 +21,6 @@ variables:
   - export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools"
   - export NDK_HOME=$ANDROID_HOME/ndk/$ANDROID_COMPILE_NDK
   # install required components
-  - echo y | sdkmanager --install "platforms;android-${ANDROID_COMPILE_SDK}" > /dev/null
-  - echo y | sdkmanager --install "platform-tools" > /dev/null
-  - echo y | sdkmanager --install "extras;android;m2repository" > /dev/null
-  - echo y | sdkmanager --install "extras;google;m2repository" > /dev/null
   - echo y | sdkmanager --install "ndk;${ANDROID_COMPILE_NDK}" > /dev/null
 
 .configure_gradle: &configure_gradle
