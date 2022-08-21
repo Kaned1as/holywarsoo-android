@@ -466,8 +466,8 @@ object Network {
 
         val topicName = doc.select("head title").text()
         val topicWritable = doc.select("div#brdmain div.postlinksb p.postlink a[href^=post.php]")
-        val topicFavorite = doc.select("div#brdmain div.postlinksb p.subscribelink a[href*=favorite]")
-        val topicSubscribe = doc.select("div#brdmain div.postlinksb p.subscribelink a[href*=subscribe]")
+        val topicFavorite = doc.select("div#brdmain div.postlinksb p.subscribelink1 a[href*=favorite]")
+        val topicSubscribe = doc.select("div#brdmain div.postlinksb p.subscribelink1 a[href*=subscribe]")
 
         val pageLinks = doc.select("div#brdmain > div.linkst p.pagelink").first()
             ?: throw IOException("Invalid topic page: $topicRef")
@@ -652,6 +652,7 @@ object Network {
 
         val reqBody = FormBody.Builder()
             .add("req_message", message)
+            .add("favorite", "1")
 
         for (input in replyPageInputs) {
             reqBody.add(input.attr("name"), input.attr("value"))
@@ -880,13 +881,14 @@ object Network {
     private fun postProcessMessage(msgId: Int, msgBody: Element): Spanned {
         // need to detect all expandable spoiler tags and replace them with
         // standard `details` + `summary`
-        for (spoilerTag in msgBody.select("div[onclick*=▼]")) {
-            spoilerTag.parent().apply {
+        for (spoilerContainer in msgBody.select("div.hh_spoiler_box")) {
+            spoilerContainer.apply {
                 tagName("details") // replace quotebox `div` with `details` tag
                 clearAttributes()          // clear all attributes it might have
             }
 
-            spoilerTag.apply {
+            val spoilerText = spoilerContainer.select("span.hh_spoiler_arrow + span").first()
+            spoilerText.apply {
                 tagName("summary") // replace spoiler text `div` with `summary` tag
                 clearAttributes()          // clear all attributes it might have
                 html(this.ownText())       // we don't need a span with down/up arrow, just spoiler text
@@ -980,8 +982,8 @@ object Network {
             val forumSub = forum.select("td.tcl div.forumdesc")
             val forumTopics = forum.select("td.tc2").text()
             val forumMessages = forum.select("td.tc3").text()
-            val lastMessageLink = forum.select("td.tcr > a")
-            val lastMessageDate = forum.select("td.tcr > span")
+            val lastMessageLink = forum.select("td.tcr > span > a")
+            val lastMessageDate = forum.select("td.tcr > span > span")
 
             val forumUrl = resolve(forumLink.attr("href"))
             val lastMessageUrl = resolve(lastMessageLink.attr("href"))
