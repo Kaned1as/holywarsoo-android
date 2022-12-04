@@ -23,23 +23,6 @@ open class EditorFragment: BottomSheetDialogFragment() {
 
     protected lateinit var editor: EditorViews
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (permissions.isEmpty()) {
-            return // request cancelled
-        }
-
-        // Return from the permission request we sent in [uploadImage]
-        if (requestCode == EditorViews.PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD) {
-            val result = permissions.filterIndexed { idx, pm -> pm == Manifest.permission.WRITE_EXTERNAL_STORAGE && grantResults[idx] == PackageManager.PERMISSION_GRANTED }
-            when (result.any()) {
-                true -> editor.uploadImage(editor.binding.editQuickImage)
-                false -> Toast.makeText(requireContext(), R.string.no_permissions, Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     /**
      * Called when activity called to select image/file to upload has finished executing
      */

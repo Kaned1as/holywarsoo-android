@@ -1,16 +1,13 @@
 package com.kanedias.holywarsoo
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.ActivityNotFoundException
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
-import androidx.core.content.ContextCompat
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
@@ -36,7 +33,6 @@ class EditorViews(private val parent: Fragment, val binding: FragmentAddMessageB
 
     companion object {
         const val ACTIVITY_REQUEST_IMAGE_UPLOAD = 0
-        const val PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD = 0
     }
 
     init {
@@ -118,12 +114,6 @@ class EditorViews(private val parent: Fragment, val binding: FragmentAddMessageB
      * Image upload button requires special handling
      */
     fun uploadImage(clicked: View) {
-        // sometimes we need SD-card access to load the image
-        if (ContextCompat.checkSelfPermission(binding.root.context, WRITE_EXTERNAL_STORAGE) != PERMISSION_GRANTED) {
-            parent.requestPermissions(arrayOf(WRITE_EXTERNAL_STORAGE), PERMISSION_REQUEST_STORAGE_FOR_IMAGE_UPLOAD)
-            return
-        }
-
         if (binding.editInsertFromClipboard.isChecked) {
             // delegate to just paste image link from clipboard
             editSelection(clicked)
